@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const readline = require('readline');
 const { google } = require('googleapis');
 
@@ -10,62 +11,121 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.readonly',
 ];
 
-// All-day event: end date must be the next day (exclusive)
+const COLORS = [
+  { id: '1',  name: 'Lavender'  },
+  { id: '2',  name: 'Sage'      },
+  { id: '3',  name: 'Grape'     },
+  { id: '4',  name: 'Flamingo'  },
+  { id: '5',  name: 'Banana'    },
+  { id: '6',  name: 'Tangerine' },
+  { id: '7',  name: 'Peacock'   },
+  { id: '8',  name: 'Blueberry' },
+  { id: '9',  name: 'Basil'     },
+  { id: '10', name: 'Tomato'    },
+  { id: '11', name: 'Flamingo'  },
+];
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function resolvePath(input) {
+  // Strip surrounding quotes (single or double) and trim whitespace
+  let p = input.trim().replace(/^['"]|['"]$/g, '').trim();
+  // Normalize Windows backslashes
+  p = p.replace(/\\/g, '/');
+  // Expand ~
+  if (p.startsWith('~')) p = path.join(os.homedir(), p.slice(1));
+  return path.resolve(p);
+}
+
 function nextDay(dateStr) {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + 1);
   return d.toISOString().split('T')[0];
 }
 
-function makeEvent(name, topic, date) {
-  return {
-    summary: `${topic} - ${name}`,
-    colorId: '3', // Grape (purple)
-    start: { date },
-    end: { date: nextDay(date) },
-    reminders: {
-      useDefault: false,
-      overrides: [
-        // 2 weeks before at 9am = 14*24*60 - 9*60 = 19620 minutes before midnight
-        { method: 'email', minutes: 19620 },
-      ],
-    },
-  };
+function parseCSV(filePath) {
+  const lines = fs.readFileSync(filePath, 'utf-8').trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+
+  for (const col of ['name', 'topic', 'date']) {
+    if (!headers.includes(col)) throw new Error(`El CSV debe tener la columna "${col}".`);
+  }
+
+  return lines.slice(1).map((line, i) => {
+    const values = line.split(',').map(v => v.trim());
+    const row = Object.fromEntries(headers.map((h, j) => [h, values[j] ?? '']));
+
+    if (!row.name)  throw new Error(`Fila ${i + 2}: falta "name".`);
+    if (!row.topic) throw new Error(`Fila ${i + 2}: falta "topic".`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date))
+      throw new Error(`Fila ${i + 2}: "date" debe ser YYYY-MM-DD (ej: 2026-04-01).`);
+
+    return { name: row.name, topic: row.topic, date: row.date };
+  });
 }
 
-const EVENTS = [
-  makeEvent('1er Sprint',           'Inv Operativa',    '2026-04-01'),
-  makeEvent('1er formativa',        'Adm de Recursos',  '2026-04-22'),
-  makeEvent('1er Coloquio',         'Simulacion',       '2026-05-04'),
-  makeEvent('1er parcial',          'Ing y Calidad',    '2026-05-05'),
-  makeEvent('1er parcial teórico',  'Inv Operativa',    '2026-05-07'),
-  makeEvent('1er parcial práctico', 'Inv Operativa',    '2026-05-08'),
-  makeEvent('1er parcial teoria',   'Simulacion',       '2026-05-09'),
-  makeEvent('2do parcial',          'Ing y Calidad',    '2026-06-11'),
-  makeEvent('2do parcial teórico',  'Inv Operativa',    '2026-06-11'),
-  makeEvent('2do parcial práctico', 'Inv Operativa',    '2026-06-12'),
-  makeEvent('2do Coloquio',         'Simulacion',       '2026-06-22'),
-  makeEvent('3er Parcial',          'Ing y Calidad',    '2026-06-25'),
-  makeEvent('2do Parcial teorico',  'Simulacion',       '2026-06-27'),
-  makeEvent('1er Recu',             'Ing y Calidad',    '2026-06-30'),
-  makeEvent('2da formativa',        'Adm de Recursos',  '2026-07-01'),
-  makeEvent('Examen Final',         'Ing y Calidad',    '2026-07-02'),
-  makeEvent('1er Recu',             'Simulacion',       '2026-07-04'),
-  makeEvent('Presentacion TPI',     'Simulacion',       '2026-07-06'),
-  makeEvent('Recu final',           'Ing y Calidad',    '2026-07-07'),
-  makeEvent('1er parcial',          'Adm de Recursos',  '2026-07-08'),
-  makeEvent('2do Recu',             'Simulacion',       '2026-07-14'),
-  makeEvent('Recus Formativas',     'Adm de Recursos',  '2026-07-15'),
-  makeEvent('1er Recu',             'Adm de Recursos',  '2026-08-12'),
-  makeEvent('3er formativa',        'Adm de Recursos',  '2026-09-30'),
-  makeEvent('4ta formativa',        'Adm de Recursos',  '2026-10-28'),
-  makeEvent('2do parcial',          'Adm de Recursos',  '2026-11-04'),
-  makeEvent('2do Recu + formativas','Adm de Recursos',  '2026-11-18'),
-  makeEvent('Presentacion TPI',     'Adm de Recursos',  '2026-11-25'),
-  makeEvent('Recu TPI',             'Adm de Recursos',  '2026-12-02'),
-];
+// ── Prompts ───────────────────────────────────────────────────────────────────
 
-async function authorize() {
+function createRL() {
+  return readline.createInterface({ input: process.stdin, output: process.stdout });
+}
+
+function ask(rl, question) {
+  return new Promise(resolve => rl.question(question, answer => resolve(answer.trim())));
+}
+
+async function promptCSVPath(rl) {
+  while (true) {
+    const input = await ask(rl, 'Ruta del archivo CSV: ');
+    const resolved = resolvePath(input);
+    if (fs.existsSync(resolved)) return resolved;
+    console.log(`  No se encontró: ${resolved}\n`);
+  }
+}
+
+async function promptCalendarName(rl) {
+  return ask(rl, 'Nombre del calendario de Google: ');
+}
+
+async function promptColor(rl) {
+  console.log('\nColores disponibles:');
+  COLORS.forEach(c => console.log(`  ${c.id.padStart(2)}. ${c.name}`));
+  console.log('');
+
+  while (true) {
+    const input = await ask(rl, 'Número de color [3 = Grape]: ');
+    const val = input === '' ? '3' : input;
+    const color = COLORS.find(c => c.id === val);
+    if (color) return color;
+    console.log(`  Opción inválida. Elegí un número entre 1 y 11.\n`);
+  }
+}
+
+async function promptNotification(rl) {
+  let days;
+  while (true) {
+    const input = await ask(rl, '\n¿Cuántos días antes querés que te notifiquen? [Enter = 14]: ');
+    if (input === '') { days = 14; break; }
+    const val = parseInt(input);
+    if (!isNaN(val) && val > 0) { days = val; break; }
+    console.log('  Ingresá un número mayor a 0.');
+  }
+
+  let hour;
+  while (true) {
+    const input = await ask(rl, '¿A qué hora? (0-23) [Enter = 9]: ');
+    if (input === '') { hour = 9; break; }
+    const val = parseInt(input);
+    if (!isNaN(val) && val >= 0 && val <= 23) { hour = val; break; }
+    console.log('  Ingresá un número entre 0 y 23.');
+  }
+
+  return { days, hour };
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+async function authorize(rl) {
   const credentials = JSON.parse(fs.readFileSync(CREDENTIALS_PATH));
   const { client_id, client_secret, redirect_uris } = credentials.installed;
   const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
@@ -80,10 +140,7 @@ async function authorize() {
   console.log(authUrl);
   console.log('');
 
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  const code = await new Promise(resolve => rl.question('Pega aquí el código de autorización: ', resolve));
-  rl.close();
-
+  const code = await ask(rl, 'Pega aquí el código de autorización: ');
   const { tokens } = await oAuth2Client.getToken(code);
   oAuth2Client.setCredentials(tokens);
   fs.writeFileSync(TOKEN_PATH, JSON.stringify(tokens));
@@ -94,23 +151,72 @@ async function authorize() {
 async function getCalendarId(calendar, name) {
   const res = await calendar.calendarList.list();
   const cal = res.data.items.find(c => c.summary === name);
-  if (!cal) throw new Error(`No se encontró el calendario "${name}". Verificá que existe y que está en tu cuenta.`);
+  if (!cal) throw new Error(`No se encontró el calendario "${name}". Verificá que existe en tu cuenta.`);
   return cal.id;
 }
 
+// ── Main ──────────────────────────────────────────────────────────────────────
+
 async function main() {
-  const auth = await authorize();
-  const calendar = google.calendar({ version: 'v3', auth });
+  const rl = createRL();
 
-  const calendarId = await getCalendarId(calendar, 'Alejo Parciales 2026');
-  console.log(`Calendario encontrado: ${calendarId}\n`);
+  console.log('=== Google Calendar Event Creator ===\n');
 
-  console.log(`Creando ${EVENTS.length} eventos...\n`);
-  for (const event of EVENTS) {
-    const res = await calendar.events.insert({ calendarId, resource: event });
-    console.log(`✓ ${event.summary} (${event.start.date}) → ${res.data.htmlLink}`);
+  const csvPath      = await promptCSVPath(rl);
+  const calendarName = await promptCalendarName(rl);
+  const color        = await promptColor(rl);
+  const notification = await promptNotification(rl);
+
+  // minutes before midnight of the event day that equals X days before at Y hour
+  const notifyMinutes = notification.days * 24 * 60 - notification.hour * 60;
+
+  let rows;
+  try {
+    rows = parseCSV(csvPath);
+  } catch (err) {
+    console.error(`\nError en el CSV: ${err.message}`);
+    rl.close();
+    process.exit(1);
   }
-  console.log('\nTodos los eventos creados.');
+
+  console.log(`\n${rows.length} eventos encontrados:`);
+  rows.forEach(r => console.log(`  - ${r.topic} - ${r.name} (${r.date})`));
+  console.log('');
+
+  const confirm = await ask(rl, '¿Crear estos eventos? (s/n): ');
+  if (confirm.toLowerCase() !== 's') {
+    console.log('Cancelado.');
+    rl.close();
+    return;
+  }
+
+  const auth = await authorize(rl);
+  rl.close();
+
+  const calendar = google.calendar({ version: 'v3', auth });
+  const calendarId = await getCalendarId(calendar, calendarName);
+
+  console.log(`\nCreando eventos en "${calendarName}"...\n`);
+
+  for (const row of rows) {
+    const event = {
+      summary: `${row.topic} - ${row.name}`,
+      colorId: color.id,
+      start: { date: row.date },
+      end:   { date: nextDay(row.date) },
+      reminders: {
+        useDefault: false,
+        overrides: [{ method: 'email', minutes: notifyMinutes }],
+      },
+    };
+    await calendar.events.insert({ calendarId, resource: event });
+    console.log(`✓ ${event.summary} (${row.date})`);
+  }
+
+  console.log(`\nListo. ${rows.length} eventos creados.`);
 }
 
-main().catch(console.error);
+main().catch(err => {
+  console.error('\nError:', err.message);
+  process.exit(1);
+});
