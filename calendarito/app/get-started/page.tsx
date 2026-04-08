@@ -749,36 +749,6 @@ Dinner with Valentina on May 12`}
                       </>
                     )}
                   </StepCard>
-
-                  <StepCard num={3} title="Event color">
-                    <div className="flex flex-wrap gap-2.5">
-                      {COLORS.map(c => (
-                        <button
-                          key={c.id}
-                          onClick={() => setColorId(c.id)}
-                          title={c.name}
-                          className={`h-8 w-8 cursor-pointer rounded-full border-[2.5px] transition-transform ${c.swatchClass} ${
-                            colorId === c.id
-                              ? 'scale-[1.15] border-[#0A0A0A] ring-[2.5px] ring-[#E8E815] ring-offset-1'
-                              : 'border-transparent'
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </StepCard>
-
-                  <StepCard num={4} title="Email reminder">
-                    <div className="flex gap-3">
-                      <div className="flex-1">
-                        <p className="mb-1.5 text-xs text-[#999]">Days before</p>
-                        <Input type="number" min={1} value={notifyDays} onChange={e => setNotifyDays(Number(e.target.value))} />
-                      </div>
-                      <div className="flex-1">
-                        <p className="mb-1.5 text-xs text-[#999]">Hour (0-23)</p>
-                        <Input type="number" min={0} max={23} value={notifyHour} onChange={e => setNotifyHour(Number(e.target.value))} />
-                      </div>
-                    </div>
-                  </StepCard>
                 </>
               )}
 
