@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "Calendarito",
     images: [
       {
-        url: "/og-image.png",
+        url: "https://qmuzyruteeekpodralsd.supabase.co/storage/v1/object/public/Images/og-image.png",
         width: 1200,
         height: 630,
         alt: "Calendarito – Drop or type anything, get events in your Calendar",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Calendarito",
     description: "Turn natural language, files, PDFs, and images into Google Calendar events.",
-    images: ["/og-image.png"],
+    images: ["https://qmuzyruteeekpodralsd.supabase.co/storage/v1/object/public/Images/og-image.png"],
   },
 };
 
