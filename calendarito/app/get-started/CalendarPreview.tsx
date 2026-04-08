@@ -6,10 +6,6 @@ import { createEventModalPlugin } from '@schedule-x/event-modal';
 import { ScheduleXCalendar, useNextCalendarApp } from '@schedule-x/react';
 import '@schedule-x/theme-default/dist/index.css';
 
-// Temporal is a Stage 3 global — TypeScript doesn't include its types by default
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const { Temporal } = globalThis as any;
-
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 interface EventRow {
@@ -47,20 +43,15 @@ function normalizeDateOnly(value: string): string | null {
   return parsed.toISOString().slice(0, 10);
 }
 
-function toTemporalStart(dateOnly: string, allDay: boolean, time?: string) {
-  if (allDay || !time) return Temporal.PlainDate.from(dateOnly);
-  return Temporal.ZonedDateTime.from(`${dateOnly}T${time}:00[UTC]`);
-}
-
-function toTemporalEnd(dateOnly: string, allDay: boolean, time?: string) {
-  if (allDay || !time) return Temporal.PlainDate.from(dateOnly);
-  return Temporal.ZonedDateTime.from(`${dateOnly}T${time}:00[UTC]`);
+function toScheduleDate(dateOnly: string, allDay: boolean, time?: string): string {
+  if (allDay || !time) return dateOnly;
+  return `${dateOnly} ${time}`;
 }
 
 export default function CalendarPreview({ events, colorId }: Props) {
   const calendarEvents = useMemo(
     () =>
-      events.reduce<Array<{ id: string; title: string; start: unknown; end: unknown; calendarId: string }>>(
+      events.reduce<Array<{ id: string; title: string; start: string; end: string; calendarId: string }>>(
         (acc, event, index) => {
           const dateOnly = normalizeDateOnly(event.date);
           if (!dateOnly) return acc;
@@ -70,8 +61,8 @@ export default function CalendarPreview({ events, colorId }: Props) {
           acc.push({
             id: String(index),
             title: event.summary,
-            start: toTemporalStart(dateOnly, isAllDay, event.startTime),
-            end: toTemporalEnd(dateOnly, isAllDay, event.endTime),
+            start: toScheduleDate(dateOnly, isAllDay, event.startTime),
+            end: toScheduleDate(dateOnly, isAllDay, event.endTime),
             calendarId: `preview-${eventColorId}`,
           });
           return acc;
