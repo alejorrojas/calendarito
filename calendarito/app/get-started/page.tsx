@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const CalendarPreview = dynamic(() => import('./CalendarPreview'), { ssr: false });
 
@@ -362,7 +363,7 @@ export default function EmpezarPage() {
     setError('');
     setResult(null);
     try {
-      let targetCalendarId = calendarId;
+      let targetCalendarId = calendarId || calendars[0]?.id || '';
 
       if (newCalendarName.trim()) {
         const calRes = await fetch('/api/calendars/create', {
@@ -695,22 +696,52 @@ Dinner with Valentina on May 12`}
               {authenticated && (
                 <>
                   <StepCard num={2} title="Calendar">
-                    <select
-                      value={calendarId}
-                      onChange={e => setCalendarId(e.target.value)}
-                      className="w-full cursor-pointer appearance-none rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-[14px] py-[11px] text-sm text-[#0A0A0A] outline-none transition-colors focus:border-[#0A0A0A]"
+                    <Select
+                      value={newCalendarName ? '__new__' : calendarId}
+                      onValueChange={val => {
+                        if (val === '__new__') {
+                          setCalendarId('');
+                          setNewCalendarName('');
+                        } else {
+                          setCalendarId(val);
+                          setNewCalendarName('');
+                        }
+                      }}
                     >
-                      {calendars.map(c => <option key={c.id} value={c.id ?? ''}>{c.name}</option>)}
-                    </select>
-                    <p className="mt-3 mb-1.5 text-xs text-[#999]">Or create a new calendar</p>
-                    <Input
-                      type="text"
-                      placeholder="New calendar name"
-                      value={newCalendarName}
-                      onChange={e => setNewCalendarName(e.target.value)}
-                    />
-                    {newCalendarName.trim() && (
-                      <p className="mt-1.5 text-[11px] text-[#888]">Will be created when you click &quot;Create in Google Calendar&quot;</p>
+                      <SelectTrigger className="w-full rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-[14px] py-[11px] text-sm text-[#0A0A0A] focus:border-[#0A0A0A] focus:ring-0 h-auto">
+                        <SelectValue placeholder="Select a calendar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {calendars.map(c => (
+                          <SelectItem key={c.id} value={c.id ?? ''}>{c.name}</SelectItem>
+                        ))}
+                        <SelectItem value="__new__" className="text-[#555] italic">
+                          + Add new calendar...
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {(newCalendarName !== '' || calendarId === '') && (
+                      <AnimatePresence>
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.18 }}
+                          className="mt-2 overflow-hidden"
+                        >
+                          <Input
+                            type="text"
+                            placeholder="Add new calendar..."
+                            value={newCalendarName}
+                            onChange={e => setNewCalendarName(e.target.value)}
+                            autoFocus
+                          />
+                          {newCalendarName.trim() && (
+                            <p className="mt-1.5 text-[11px] text-[#888]">Will be created when you click &quot;Create in Google Calendar&quot;</p>
+                          )}
+                        </motion.div>
+                      </AnimatePresence>
                     )}
                   </StepCard>
                 </>

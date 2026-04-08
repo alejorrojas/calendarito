@@ -65,12 +65,11 @@ export default function HowItWorksPage() {
 
         <div className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[28px] border border-[#E4E4E4] bg-[#F7F7F7] shadow-[0_12px_36px_rgba(0,0,0,0.1)]">
           <Image
-            src="/api/flow-map"
+            src="/flow-map.png"
             alt="Calendarito flow map"
             width={1024}
             height={576}
             className="block h-auto w-full"
-            unoptimized
           />
         </div>
       </section>
