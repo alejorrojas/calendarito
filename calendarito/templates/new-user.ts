@@ -102,7 +102,7 @@ export function newUserTemplate(email: string, createdAt: string) {
           <tr>
             <td align="center" style="padding-top:20px;">
               <p style="margin:0;font-size:12px;color:#AAAAAA;">
-                Calendarito · Drop in anything, get calendar events
+                Calendarito · Drop or type anything, get events in your Calendar
               </p>
             </td>
           </tr>

@@ -118,17 +118,15 @@ export default function HomePage() {
           }
           className="mx-auto mb-7 max-w-[820px] font-heading text-[clamp(44px,7vw,72px)] leading-[1.05] font-black tracking-[-0.04em] text-[#0A0A0A]"
         >
-          Drop in anything,
+          Drop or type anything,
           <br />
-          get{" "}
+          get events in your{" "}
           <span className="relative inline-block pb-2">
-            calendar
+            Calendar
             <span className="pointer-events-none absolute right-0 bottom-0 left-0">
               <WavySVG />
             </span>
           </span>
-          <br />
-          events
         </motion.h1>
 
         <motion.p
