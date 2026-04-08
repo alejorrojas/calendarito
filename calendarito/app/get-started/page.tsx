@@ -185,7 +185,9 @@ export default function EmpezarPage() {
   const [storageHydrated, setStorageHydrated] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const selectedCalendar = calendars.find((calendar) => calendar.id === calendarId);
-  const selectedCalendarLabel = selectedCalendar?.name ?? '';
+  const calendarLabel = (c: Calendar) =>
+    c.id === userEmail ? `Default Calendar - ${userEmail}` : c.name;
+  const selectedCalendarLabel = selectedCalendar ? calendarLabel(selectedCalendar) : '';
   const calendarSelectValue = newCalendarName ? '__new__' : (selectedCalendar ? calendarId : '');
   const calendarSelectLabel = calendarSelectValue === '__new__' ? '+ Add new calendar...' : selectedCalendarLabel;
 
@@ -295,8 +297,8 @@ export default function EmpezarPage() {
   }, [userEmail]);
 
   useEffect(() => {
-    if (authenticated) void fetchCalendars();
-  }, [authenticated, fetchCalendars]);
+    if (authenticated && userEmail) void fetchCalendars();
+  }, [authenticated, userEmail, fetchCalendars]);
 
   async function handleLogout() {
     const supabase = createSupabaseBrowserClient();
@@ -729,7 +731,7 @@ Dinner with Valentina on May 12`}
                       </SelectTrigger>
                       <SelectContent>
                         {calendars.map(c => (
-                          <SelectItem key={c.id} value={c.id ?? ''}>{c.name}</SelectItem>
+                          <SelectItem key={c.id} value={c.id ?? ''}>{calendarLabel(c)}</SelectItem>
                         ))}
                         <SelectItem value="__new__" className="text-[#555]">
                           + Add new calendar...
