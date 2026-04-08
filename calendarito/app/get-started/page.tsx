@@ -158,6 +158,7 @@ function toUserFriendlyErrorMessage(message: string, fallback: string): string {
 export default function EmpezarPage() {
   const shouldReduceMotion = useReducedMotion();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const [userEmail, setUserEmail] = useState('');
   const [supabaseAccessToken, setSupabaseAccessToken] = useState('');
   const [googleAccessToken, setGoogleAccessToken] = useState('');
   const [calendars, setCalendars] = useState<Calendar[]>([]);
@@ -255,6 +256,7 @@ export default function EmpezarPage() {
     supabase.auth.getSession().then(({ data }) => {
       setAuthenticated(Boolean(data.session));
       if (data.session?.access_token) setSupabaseAccessToken(data.session.access_token);
+      if (data.session?.user?.email) setUserEmail(data.session.user.email);
       const providerToken = data.session?.provider_token;
       if (providerToken) {
         setGoogleAccessToken(providerToken);
@@ -279,10 +281,18 @@ export default function EmpezarPage() {
     const res = await fetch('/api/calendars');
     const data = await res.json();
     if (data.calendars) {
-      setCalendars(data.calendars);
-      setCalendarId(data.calendars[0]?.id ?? '');
+      const all: Calendar[] = data.calendars;
+      // Sort so the primary calendar (id === user email) appears first
+      const sorted = [...all].sort((a, b) => {
+        if (a.id === userEmail) return -1;
+        if (b.id === userEmail) return 1;
+        return 0;
+      });
+      setCalendars(sorted);
+      const primary = sorted.find(c => c.id === userEmail);
+      setCalendarId(primary?.id ?? sorted[0]?.id ?? '');
     }
-  }, []);
+  }, [userEmail]);
 
   useEffect(() => {
     if (authenticated) void fetchCalendars();
