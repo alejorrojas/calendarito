@@ -16,7 +16,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Calendarito",
-  description: "Turn natural language, files, PDFs, and images into Google Calendar events with AI.",
+  description: "Turn natural language, files, PDFs, and images into Google Calendar events.",
 };
 
 export default function RootLayout({

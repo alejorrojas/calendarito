@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion, useReducedMotion } from 'framer-motion';
 
 const steps = [
   {
@@ -14,11 +15,24 @@ const steps = [
   },
   {
     title: 'We structure, you confirm',
-    description: 'AI turns everything into clear events so you can review before creating them.',
+    description: 'We turn everything into clear events so you can review before creating them.',
   },
 ];
 
 export default function ComoFuncionaPage() {
+  const shouldReduceMotion = useReducedMotion();
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: shouldReduceMotion ? { duration: 0 } : { staggerChildren: 0.08, delayChildren: 0.12 },
+    },
+  };
+  const itemVariants = {
+    hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 14 },
+    visible: shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 },
+  };
+
   return (
     <main className="flex min-h-screen flex-col bg-[var(--bg-home)] pt-[68px]">
       <div className="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-home)] px-6 pt-4 pb-0">
@@ -46,7 +60,7 @@ export default function ComoFuncionaPage() {
         </h1>
         <p className="mx-auto mb-8 max-w-3xl text-sm leading-6 text-[#555] md:text-base">
           This is the complete flow. First connect your account, then share your content,
-          and finally review the events AI prepared for your Google Calendar.
+          and finally review the events we prepared for your Google Calendar.
         </p>
 
         <div className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[28px] border border-[#E4E4E4] bg-[#F7F7F7] shadow-[0_12px_36px_rgba(0,0,0,0.1)]">
@@ -62,17 +76,28 @@ export default function ComoFuncionaPage() {
       </section>
 
       <section className="px-6 pb-14">
-        <div className="mx-auto grid w-full max-w-[900px] gap-3 md:grid-cols-3">
+        <motion.div
+          className="mx-auto grid w-full max-w-[900px] gap-3 md:grid-cols-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
           {steps.map((step, index) => (
-            <article key={step.title} className="rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
+            <motion.article
+              key={step.title}
+              variants={itemVariants}
+              whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+              transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 24 }}
+              className="rounded-2xl border border-[#ECECEC] bg-white p-4 shadow-[0_4px_18px_rgba(0,0,0,0.04)]"
+            >
               <div className="font-heading mb-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#E8E815] text-xs font-bold text-[#0A0A0A]">
                 {index + 1}
               </div>
               <h2 className="font-heading mb-1.5 text-sm font-semibold text-[#0A0A0A]">{step.title}</h2>
               <p className="text-sm leading-5 text-[#666]">{step.description}</p>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
       </section>
     </main>
   );

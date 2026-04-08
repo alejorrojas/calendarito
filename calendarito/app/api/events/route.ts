@@ -1,5 +1,6 @@
 import { getOAuthClient, nextDay } from '@/lib/google';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { incrementUsageCounters } from '@/lib/usage-tracking';
 import { google } from 'googleapis';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -83,6 +84,8 @@ export async function POST(req: NextRequest) {
       const inserted = (res as { data: { htmlLink?: string } }).data;
       created.push({ summary: event.summary, date: row.date, link: inserted.htmlLink });
     }
+
+    await incrementUsageCounters(supabase, session.user.id, { eventsCreated: created.length });
 
     return NextResponse.json({ created });
   } catch (err) {

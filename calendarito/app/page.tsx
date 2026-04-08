@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 function WavySVG() {
@@ -20,6 +21,7 @@ function WavySVG() {
 
 export default function HomePage() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -37,6 +39,17 @@ export default function HomePage() {
 
   const ctaHref = '/empezar';
   const ctaLabel = 'Start free';
+  const heroContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: shouldReduceMotion ? { duration: 0 } : { staggerChildren: 0.08, delayChildren: 0.08 },
+    },
+  };
+  const heroItem = {
+    hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 16 },
+    visible: shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 },
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--bg-home)] pt-[68px]">
@@ -73,8 +86,17 @@ export default function HomePage() {
       </div>
 
       {/* ── Hero ── */}
-      <section className="flex flex-1 flex-col items-center px-6 pt-[60px] text-center">
-        <h1 className="mx-auto mb-7 max-w-[820px] font-heading text-[clamp(44px,7vw,72px)] leading-[1.05] font-black tracking-[-0.04em] text-[#0A0A0A]">
+      <motion.section
+        className="flex flex-1 flex-col items-center px-6 pt-[60px] text-center"
+        variants={heroContainer}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.h1
+          variants={heroItem}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.35, ease: 'easeOut' }}
+          className="mx-auto mb-7 max-w-[820px] font-heading text-[clamp(44px,7vw,72px)] leading-[1.05] font-black tracking-[-0.04em] text-[#0A0A0A]"
+        >
           Drop in anything,<br />
           get{' '}
           <span className="relative inline-block pb-2">
@@ -85,28 +107,40 @@ export default function HomePage() {
           </span>
           <br />
           events
-        </h1>
+        </motion.h1>
 
-        <p className="mx-auto mb-10 max-w-[460px] text-lg leading-[1.6] text-[#555]">
+        <motion.p
+          variants={heroItem}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.32, ease: 'easeOut' }}
+          className="mx-auto mb-10 max-w-[460px] text-lg leading-[1.6] text-[#555]"
+        >
           Use natural language, files, PDFs, or images. Share anything you want, and we handle the rest to create events in your Google Calendar.
-        </p>
+        </motion.p>
 
-        <div className="mb-16 flex flex-wrap justify-center gap-3">
-          <Link
-            href={ctaHref}
-            className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#E8E815] px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512] [view-transition-name:cta-empezar]"
-          >
-            {ctaLabel}
-          </Link>
-          <Link
-            href="/como-funciona"
-            className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
-          >
-            See how it works
-          </Link>
-        </div>
+        <motion.div variants={heroItem} className="mb-16 flex flex-wrap justify-center gap-3">
+          <motion.div whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }} whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}>
+            <Link
+              href={ctaHref}
+              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#E8E815] px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512] [view-transition-name:cta-empezar]"
+            >
+              {ctaLabel}
+            </Link>
+          </motion.div>
+          <motion.div whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }} whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}>
+            <Link
+              href="/como-funciona"
+              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
+            >
+              See how it works
+            </Link>
+          </motion.div>
+        </motion.div>
 
-        <div className="mb-16 w-full max-w-[500px] overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
+        <motion.div
+          variants={heroItem}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.38, ease: 'easeOut' }}
+          className="mb-16 w-full max-w-[500px] overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
+        >
           <Image
             src="/hero-2.png"
             alt="Character organizing a calendar"
@@ -115,8 +149,8 @@ export default function HomePage() {
             className="block h-auto w-full"
             priority
           />
-        </div>
-      </section>
+        </motion.div>
+      </motion.section>
 
     </div>
   );

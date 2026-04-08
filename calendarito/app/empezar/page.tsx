@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
@@ -24,6 +25,7 @@ const COLORS = [
 const EVENTS_STORAGE_KEY = 'calendarito.extracted_events.v1';
 const DRAFT_STORAGE_KEY = 'calendarito.extracted_draft.v1';
 const GOOGLE_TOKEN_STORAGE_KEY = 'calendarito.google_provider_token.v1';
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
 
 interface EventRow {
   summary: string;
@@ -34,6 +36,7 @@ interface EventRow {
   timezone?: string;
   description?: string;
   location?: string;
+  colorId?: string;
 }
 
 interface Calendar {
@@ -48,6 +51,12 @@ interface DraftState {
   colorId: string;
   notifyDays: number;
   notifyHour: number;
+}
+
+interface PendingFileSource {
+  fileData: string;
+  mediaType: string;
+  filename: string;
 }
 
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -74,9 +83,27 @@ function eventLabel(event: EventRow): string {
   return event.date;
 }
 
-function StepCard({ num, title, children }: { num: number; title: string; children: React.ReactNode }) {
+function StepCard({
+  num,
+  title,
+  children,
+  hoverable = true,
+}: {
+  num: number;
+  title: string;
+  children: React.ReactNode;
+  hoverable?: boolean;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <article className="rounded-2xl border border-[#ECECEC] bg-white p-5 shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
+    <motion.article
+      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
+      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+      whileHover={shouldReduceMotion || !hoverable ? undefined : { y: -2 }}
+      transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 300, damping: 24 }}
+      className="rounded-2xl border border-[#ECECEC] bg-white p-5 shadow-[0_4px_18px_rgba(0,0,0,0.04)]"
+    >
       <div className="mb-3 flex items-center gap-2.5">
         <div className="font-heading flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#E8E815] text-xs font-bold text-[#0A0A0A]">
           {num}
@@ -84,7 +111,7 @@ function StepCard({ num, title, children }: { num: number; title: string; childr
         <p className="font-heading text-sm font-semibold tracking-[-0.01em] text-[#0A0A0A]">{title}</p>
       </div>
       {children}
-    </article>
+    </motion.article>
   );
 }
 
@@ -98,7 +125,37 @@ function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   );
 }
 
+function persistExtractedEvents(events: EventRow[]) {
+  window.localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
+}
+
+function clearLocalDraftState() {
+  window.localStorage.removeItem(EVENTS_STORAGE_KEY);
+  window.localStorage.removeItem(DRAFT_STORAGE_KEY);
+}
+
+function toUserFriendlyErrorMessage(message: string, fallback: string): string {
+  const normalized = message.trim().toLowerCase();
+
+  if (!normalized) return fallback;
+  if (normalized.includes('file part media type') || normalized.includes('not supported')) {
+    return 'This file format is not supported yet. Try PDF, PNG, JPG, or plain text.';
+  }
+  if (normalized.includes('unauthorized') || normalized.includes('401')) {
+    return 'Please log in with Google to continue.';
+  }
+  if (normalized.includes('network') || normalized.includes('failed to fetch')) {
+    return 'Network error. Please check your connection and try again.';
+  }
+  if (normalized.includes('missing')) {
+    return 'Some required information is missing. Please review and try again.';
+  }
+
+  return message;
+}
+
 export default function EmpezarPage() {
+  const shouldReduceMotion = useReducedMotion();
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [supabaseAccessToken, setSupabaseAccessToken] = useState('');
   const [googleAccessToken, setGoogleAccessToken] = useState('');
@@ -111,15 +168,21 @@ export default function EmpezarPage() {
   const [extractError, setExtractError] = useState('');
   const [extractWarnings, setExtractWarnings] = useState<string[]>([]);
   const [sourceType, setSourceType] = useState<'file' | 'text'>('file');
+  const [sourceSwitchDirection, setSourceSwitchDirection] = useState(1);
   const [inputText, setInputText] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [sourceSummary, setSourceSummary] = useState('');
+  const [lastExtractedSourceType, setLastExtractedSourceType] = useState<'file' | 'text' | null>(null);
+  const [lastExtractedSourceSummary, setLastExtractedSourceSummary] = useState('');
+  const [pendingFileSource, setPendingFileSource] = useState<PendingFileSource | null>(null);
   const [colorId, setColorId] = useState('3');
   const [notifyDays, setNotifyDays] = useState(14);
   const [notifyHour, setNotifyHour] = useState(9);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ summary: string; date: string }[] | null>(null);
   const [error, setError] = useState('');
+  const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
+  const [storageHydrated, setStorageHydrated] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -146,6 +209,7 @@ export default function EmpezarPage() {
             timezone: maybeEvent.timezone,
             description: maybeEvent.description,
             location: maybeEvent.location,
+            colorId: typeof maybeEvent.colorId === 'string' ? maybeEvent.colorId : undefined,
           }];
         });
 
@@ -167,15 +231,18 @@ export default function EmpezarPage() {
         setNotifyHour(draft.notifyHour ?? 9);
       } catch { window.localStorage.removeItem(DRAFT_STORAGE_KEY); }
     }
+    setStorageHydrated(true);
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(events));
-  }, [events]);
+    if (!storageHydrated) return;
+    persistExtractedEvents(events);
+  }, [events, storageHydrated]);
 
   useEffect(() => {
+    if (!storageHydrated) return;
     window.localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({ sourceType, inputText, sourceSummary, colorId, notifyDays, notifyHour }));
-  }, [sourceType, inputText, sourceSummary, colorId, notifyDays, notifyHour]);
+  }, [sourceType, inputText, sourceSummary, colorId, notifyDays, notifyHour, storageHydrated]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -241,15 +308,15 @@ export default function EmpezarPage() {
       setCreatingNewCalendar(false);
       setNewCalendarName('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creating calendar');
+      const rawMessage = err instanceof Error ? err.message : 'Error creating calendar';
+      setError(toUserFriendlyErrorMessage(rawMessage, 'Error creating calendar'));
     } finally { setCreatingCalendar(false); }
   }
 
-  async function extractWithAI(body: object) {
+  async function extractWithAI(body: object, extractionSourceType: 'file' | 'text', extractionSourceSummary: string) {
     setExtracting(true);
     setExtractError('');
     setExtractWarnings([]);
-    setEvents([]);
     try {
       const res = await fetch('/api/events/extract', {
         method: 'POST',
@@ -258,27 +325,60 @@ export default function EmpezarPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Could not extract events');
-      setEvents(data.events ?? []);
+      const extractedEvents = (data.events ?? []) as EventRow[];
+      setEvents(extractedEvents);
+      persistExtractedEvents(extractedEvents);
       setExtractWarnings(data.warnings ?? []);
+      setLastExtractedSourceType(extractionSourceType);
+      setLastExtractedSourceSummary(extractionSourceSummary);
       if (!data.events?.length) setExtractError('We could not find clear events in the provided source.');
     } catch (err) {
-      setExtractError(err instanceof Error ? err.message : 'Error processing source with AI');
+      const rawMessage = err instanceof Error ? err.message : 'Error processing source';
+      setExtractError(toUserFriendlyErrorMessage(rawMessage, 'Error processing source'));
     } finally { setExtracting(false); }
   }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setPendingFileSource(null);
+      setSourceSummary('');
+      setExtractError('File is too large. Please upload a file up to 5MB.');
+      return;
+    }
+
     setSourceSummary(file.name);
     const buffer = await file.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
-    await extractWithAI({ sourceType: 'file', fileData: `data:${file.type};base64,${base64}`, mediaType: file.type, filename: file.name });
+    setPendingFileSource({
+      fileData: `data:${file.type};base64,${base64}`,
+      mediaType: file.type,
+      filename: file.name,
+    });
+    setExtractError('');
+    setExtractWarnings([]);
+  }
+
+  async function handleAnalyzeFile() {
+    if (!pendingFileSource) {
+      setExtractError('Choose a file first so we can extract events.');
+      return;
+    }
+
+    await extractWithAI({
+      sourceType: 'file',
+      fileData: pendingFileSource.fileData,
+      mediaType: pendingFileSource.mediaType,
+      filename: pendingFileSource.filename,
+    }, 'file', pendingFileSource.filename);
   }
 
   async function handleAnalyzeText() {
     if (!inputText.trim()) { setExtractError('Write something so we can extract events.'); return; }
-    setSourceSummary('Natural language');
-    await extractWithAI({ sourceType: 'text', inputText: inputText.trim() });
+    const summary = 'Natural language';
+    setSourceSummary(summary);
+    await extractWithAI({ sourceType: 'text', inputText: inputText.trim() }, 'text', summary);
   }
 
   async function handleSubmit() {
@@ -294,10 +394,45 @@ export default function EmpezarPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setResult(data.created);
-      window.localStorage.removeItem(EVENTS_STORAGE_KEY);
+      clearLocalDraftState();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error creating events');
+      const rawMessage = err instanceof Error ? err.message : 'Error creating events';
+      setError(toUserFriendlyErrorMessage(rawMessage, 'Error creating events'));
     } finally { setLoading(false); }
+  }
+
+  function updateEvent(index: number, patch: Partial<EventRow>) {
+    setEvents((prev) => prev.map((event, i) => (i === index ? { ...event, ...patch } : event)));
+  }
+
+  function removeEvent(index: number) {
+    setEvents((prev) => prev.filter((_, i) => i !== index));
+    setExpandedEvents((prev) => {
+      const next = new Set<number>();
+      for (const current of prev) {
+        if (current < index) next.add(current);
+        if (current > index) next.add(current - 1);
+      }
+      return next;
+    });
+  }
+
+  function toggleEventExpanded(index: number) {
+    setExpandedEvents((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) {
+        next.delete(index);
+      } else {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
+  function handleSourceTypeChange(nextSourceType: 'file' | 'text') {
+    if (nextSourceType === sourceType) return;
+    setSourceSwitchDirection(nextSourceType === 'text' ? 1 : -1);
+    setSourceType(nextSourceType);
   }
 
   return (
@@ -361,75 +496,202 @@ export default function EmpezarPage() {
             <div className="flex flex-col gap-3">
 
               {/* Step 1 */}
-              <StepCard num={1} title="Event source">
+              <StepCard num={1} title="Event source" hoverable={false}>
                 <div className="mb-3 flex gap-2">
                   {(['file', 'text'] as const).map(t => (
                     <button
                       key={t}
-                      onClick={() => setSourceType(t)}
+                      onClick={() => handleSourceTypeChange(t)}
                       type="button"
                       className={`font-heading cursor-pointer rounded-full px-4 py-2 text-xs font-semibold transition-colors ${
                         sourceType === t ? 'bg-[#0A0A0A] text-white' : 'border border-[#DDD] bg-white text-[#555] hover:border-[#0A0A0A]'
                       }`}
                     >
-                      {t === 'file' ? 'Upload file' : 'Write text'}
+                      {t === 'file' ? 'Upload file' : 'Type anything'}
                     </button>
                   ))}
                 </div>
 
-                {sourceType === 'file' && (
-                  <>
-                    <div
-                      onClick={() => fileRef.current?.click()}
-                      className={`cursor-pointer rounded-[14px] border-[1.5px] border-dashed p-5 text-center transition-colors ${
-                        events.length > 0 && sourceSummary ? 'border-[#86EFAC] bg-[#F0FFF4]' : 'border-[#DDD] hover:border-[#0A0A0A]'
-                      }`}
+                <div className="relative overflow-hidden">
+                  <AnimatePresence mode="wait" initial={false} custom={sourceSwitchDirection}>
+                    <motion.div
+                      key={sourceType}
+                      custom={sourceSwitchDirection}
+                      initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, x: sourceSwitchDirection > 0 ? 18 : -18 }}
+                      animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, x: 0 }}
+                      exit={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, x: sourceSwitchDirection > 0 ? -18 : 18 }}
+                      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.22, ease: 'easeOut' }}
                     >
-                      {extracting
-                        ? <p className="font-heading text-sm font-bold text-[#0A0A0A]">Extracting events with AI...</p>
-                        : events.length > 0 && sourceSummary
-                        ? <p className="font-heading text-sm font-bold text-[#15803D]">✓ {events.length} events extracted from {sourceSummary}</p>
-                        : <>
-                            <p className="font-heading mb-1 text-sm font-semibold text-[#0A0A0A]">Choose a file, PDF, or image</p>
-                            <p className="text-xs text-[#999]">Any format works.</p>
-                          </>
-                      }
-                    </div>
-                    <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
-                  </>
-                )}
-
-                {sourceType === 'text' && (
-                  <>
-                    <textarea
-                      value={inputText}
-                      onChange={e => setInputText(e.target.value)}
-                      rows={5}
-                      placeholder="Write your events in natural language..."
-                      className="w-full resize-y rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3 text-sm text-[#0A0A0A] outline-none transition-colors focus:border-[#0A0A0A]"
-                    />
-                    <button
-                      onClick={handleAnalyzeText}
-                      type="button"
-                      disabled={extracting}
-                      className="font-heading mt-2 w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3 text-sm font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
-                    >
-                      {extracting ? 'Extracting with AI...' : 'Extract events from text'}
-                    </button>
-                  </>
-                )}
+                      {sourceType === 'file' ? (
+                        <>
+                          <div
+                            onClick={() => fileRef.current?.click()}
+                            className="flex min-h-[162px] cursor-pointer flex-col items-center justify-center rounded-[14px] border-[1.5px] border-dashed border-[#DDD] p-5 text-center transition-colors hover:border-[#0A0A0A]"
+                          >
+                            {extracting
+                              ? <p className="font-heading text-sm font-bold text-[#0A0A0A]">Extracting events...</p>
+                              : events.length > 0 && lastExtractedSourceType === 'file' && lastExtractedSourceSummary
+                              ? <p className="font-heading text-sm font-bold text-[#0A0A0A]">✓ {events.length} events extracted from {lastExtractedSourceSummary}</p>
+                              : <>
+                                  <p className="font-heading mb-1 text-sm font-semibold text-[#0A0A0A]">Choose a file, PDF, or image</p>
+                                  <p className="text-xs text-[#999]">Up to 5MB.</p>
+                                </>
+                            }
+                          </div>
+                          <input ref={fileRef} type="file" className="hidden" onChange={handleFile} />
+                          <button
+                            onClick={() => void handleAnalyzeFile()}
+                            type="button"
+                            disabled={extracting || !pendingFileSource}
+                            className="font-heading mt-2 w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3 text-sm font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
+                          >
+                            {extracting ? 'Extracting...' : 'Extract events from file'}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <textarea
+                            value={inputText}
+                            onChange={e => setInputText(e.target.value)}
+                            rows={5}
+                            placeholder={`Math Exam next friday
+Team sync tomorrow at 10am
+Dinner with Valentina on May 12`}
+                            className="h-[162px] w-full resize-none rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3 text-sm text-[#0A0A0A] outline-none transition-colors focus:border-[#0A0A0A]"
+                          />
+                          <button
+                            onClick={handleAnalyzeText}
+                            type="button"
+                            disabled={extracting}
+                            className="font-heading mt-2 w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3 text-sm font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
+                          >
+                            {extracting ? 'Extracting...' : 'Extract events from text'}
+                          </button>
+                        </>
+                      )}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
 
                 {events.length > 0 && (
                   <div className="mt-3 overflow-hidden rounded-xl border border-[#ECECEC]">
-                    <div className="max-h-40 overflow-y-auto">
+                    <div className="max-h-[280px] overflow-y-auto divide-y divide-[#F5F5F5]">
                       {events.map((event, i) => (
-                        <div
+                        <motion.div
                           key={i}
-                          className={`flex justify-between px-3 py-[7px] ${i % 2 === 0 ? 'bg-[#FAFAFA]' : 'bg-white'} ${i < events.length - 1 ? 'border-b border-[#F5F5F5]' : ''}`}
+                          whileHover={{ scale: 1.005 }}
+                          transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                          className={`${i % 2 === 0 ? 'bg-[#FAFAFA]' : 'bg-white'}`}
                         >
-                          <span className="text-xs text-[#0A0A0A]">{event.summary}</span>
-                          <span className="text-xs text-[#999]">{eventLabel(event)}</span>
-                        </div>
+                          <button
+                            type="button"
+                            onClick={() => toggleEventExpanded(i)}
+                            aria-label="Toggle event editor"
+                            className="group flex w-full cursor-pointer items-center justify-between px-3 py-2 text-left"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-medium text-[#0A0A0A]">{event.summary}</p>
+                              <p className="text-[11px] text-[#888]">{eventLabel(event)}</p>
+                            </div>
+                            <div className="ml-3 flex items-center gap-2">
+                              <span
+                                className={`h-2.5 w-2.5 rounded-full ${COLORS.find((c) => c.id === (event.colorId ?? colorId))?.swatchClass ?? 'bg-[#8e24aa]'}`}
+                                aria-hidden="true"
+                              />
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                                className="text-[#666] opacity-0 transition-opacity group-hover:opacity-100"
+                              >
+                                <path
+                                  d="M12 20h9"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            </div>
+                          </button>
+
+                          {expandedEvents.has(i) && (
+                            <div className="space-y-2 px-3 pb-3">
+                              <Input
+                                value={event.summary}
+                                onChange={(e) => updateEvent(i, { summary: e.target.value })}
+                                className="px-3 py-2 text-xs"
+                                placeholder="Event title"
+                              />
+                              <div className="grid grid-cols-3 gap-2">
+                                <Input
+                                  type="date"
+                                  value={event.date}
+                                  onChange={(e) => updateEvent(i, { date: e.target.value })}
+                                  className="px-3 py-2 text-xs"
+                                />
+                                <Input
+                                  type="time"
+                                  value={event.startTime ?? ''}
+                                  onChange={(e) => {
+                                    const startTime = e.target.value || undefined;
+                                    const endTime = event.endTime;
+                                    updateEvent(i, { allDay: !(startTime || endTime), startTime, endTime });
+                                  }}
+                                  className="px-3 py-2 text-xs"
+                                />
+                                <Input
+                                  type="time"
+                                  value={event.endTime ?? ''}
+                                  onChange={(e) => {
+                                    const endTime = e.target.value || undefined;
+                                    const startTime = event.startTime;
+                                    updateEvent(i, { allDay: !(startTime || endTime), startTime, endTime });
+                                  }}
+                                  className="px-3 py-2 text-xs"
+                                />
+                              </div>
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                {COLORS.map((c) => (
+                                  <button
+                                    key={`${i}-${c.id}`}
+                                    type="button"
+                                    onClick={() => updateEvent(i, { colorId: c.id })}
+                                    title={c.name}
+                                    className={`h-6 w-6 cursor-pointer rounded-full border-[2px] ${c.swatchClass} ${
+                                      (event.colorId ?? colorId) === c.id ? 'border-[#0A0A0A]' : 'border-transparent'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <div className="mt-1 flex justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => removeEvent(i)}
+                                  aria-label="Discard event"
+                                  title="Discard event"
+                                  className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-[#B42318] transition-colors hover:bg-[#FEF3F2] hover:text-[#7A271A]"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M19 6v14a1 1 0 01-1 1H6a1 1 0 01-1-1V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
                       ))}
                     </div>
                   </div>
@@ -586,16 +848,16 @@ export default function EmpezarPage() {
           {/* ── Right column: calendar preview ── */}
           <div className="hidden min-w-0 flex-1 lg:block">
             <div className="sticky top-[84px]">
-              <div className="mb-3 flex items-center gap-2">
+              <div className="overflow-hidden rounded-2xl border border-[#ECECEC] bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
+                <CalendarPreview key={events.map(e => `${e.date}${e.summary}`).join('|')} events={events} colorId={colorId} />
+              </div>
+              <div className="mt-3 flex items-center gap-2">
                 <p className="font-heading text-xs font-semibold tracking-[0.06em] text-[#999] uppercase">Preview</p>
                 {events.length > 0 && (
                   <span className="rounded-full bg-[#E8E815] px-2 py-0.5 font-heading text-[10px] font-bold text-[#0A0A0A]">
                     {events.length} event{events.length !== 1 ? 's' : ''}
                   </span>
                 )}
-              </div>
-              <div className="overflow-hidden rounded-2xl border border-[#ECECEC] bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
-                <CalendarPreview key={events.map(e => `${e.date}${e.summary}`).join('|')} events={events} colorId={colorId} />
               </div>
               {events.length === 0 && (
                 <p className="mt-3 text-center text-xs text-[#BBB]">

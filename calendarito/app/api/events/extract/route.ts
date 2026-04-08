@@ -2,6 +2,8 @@ import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { incrementUsageCounters, logEventGeneration, logUpload, normalizeTokenUsage } from '@/lib/usage-tracking';
 
 const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -34,8 +36,22 @@ const extractionSchema = z.object({
   warnings: z.array(z.string()),
 });
 
+const EXTRACTION_MODEL = 'gpt-4o';
+
+function estimateDataUrlSizeBytes(dataUrl: string): number | null {
+  const commaIndex = dataUrl.indexOf(',');
+  if (commaIndex === -1) return null;
+  const base64 = dataUrl.slice(commaIndex + 1);
+  const padding = base64.endsWith('==') ? 2 : base64.endsWith('=') ? 1 : 0;
+  return Math.max(0, Math.floor((base64.length * 3) / 4) - padding);
+}
+
 export async function POST(req: NextRequest) {
   try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id ?? null;
+
     const body = await req.json();
     const { sourceType, inputText, fileData, mediaType, filename } = body as {
       sourceType: string;
@@ -82,10 +98,10 @@ export async function POST(req: NextRequest) {
 
     const { currentDate, currentYear } = getCurrentDateTool();
 
-    const { object } = await generateObject({
-      model: openai('gpt-4o'),
+    const result = await generateObject({
+      model: openai(EXTRACTION_MODEL),
       system: `
-You are Calendarito, an AI tool that extracts events from files, images, or natural-language text, and prepares them to be saved in Google Calendar.
+You are Calendarito, a tool that extracts events from files, images, or natural-language text, and prepares them to be saved in Google Calendar.
 
 Your only task is to transform the provided input into a valid event structure that matches the schema.
 You must not answer or perform tasks outside this scope.
@@ -108,9 +124,51 @@ Strict rules:
       schema: extractionSchema,
     });
 
-    return NextResponse.json(object);
+    if (userId) {
+      const source = sourceType === 'text' ? 'text' : mediaType?.startsWith('image/') ? 'image' : 'file';
+      const fileSize = fileData ? estimateDataUrlSizeBytes(fileData) : null;
+      const usage = normalizeTokenUsage(result.usage);
+
+      if (source !== 'text') {
+        await logUpload(supabase, {
+          userId,
+          uploadType: source,
+          fileName: filename ?? null,
+          mimeType: mediaType ?? null,
+          sizeBytes: fileSize,
+        });
+      }
+
+      await logEventGeneration(supabase, {
+        userId,
+        sourceType: source,
+        model: EXTRACTION_MODEL,
+        inputText: sourceType === 'text' ? inputText ?? null : null,
+        inputFileName: filename ?? null,
+        inputFileMime: mediaType ?? null,
+        inputFileSizeBytes: fileSize,
+        outputJson: result.object,
+        warnings: result.object.warnings,
+        status: 'success',
+        providerUsageRaw: result.usage,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        totalTokens: usage.totalTokens,
+      });
+
+      await incrementUsageCounters(supabase, userId, {
+        textRequests: source === 'text' ? 1 : 0,
+        fileUploads: source === 'file' ? 1 : 0,
+        imageUploads: source === 'image' ? 1 : 0,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        totalTokens: usage.totalTokens,
+      });
+    }
+
+    return NextResponse.json(result.object);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Error extracting events with AI';
+    const message = err instanceof Error ? err.message : 'Error extracting events';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

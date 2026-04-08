@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { GOOGLE_CALENDAR_SCOPES } from '@/lib/google-oauth';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
@@ -17,6 +18,7 @@ function getSafeNextPath(next: string | null): string {
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const shouldReduceMotion = useReducedMotion();
   const [loggingIn, setLoggingIn] = useState(false);
   const nextPath = useMemo(() => getSafeNextPath(searchParams.get('next')), [searchParams]);
 
@@ -67,16 +69,23 @@ export default function LoginPage() {
       </div>
 
       <section className="flex flex-1 items-center justify-center px-6 pb-16 pt-8">
-        <article className="w-full max-w-[460px] rounded-2xl border border-[#ECECEC] bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+        <motion.article
+          initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 16, scale: 0.98 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 320, damping: 26 }}
+          className="w-full max-w-[460px] rounded-2xl border border-[#ECECEC] bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
+        >
           <h1 className="font-heading text-3xl font-bold tracking-[-0.02em] text-[#0A0A0A]">Login</h1>
           <p className="mt-2 text-sm leading-6 text-[#555]">
             Continue with Google to connect your calendar and finish creating events.
           </p>
 
-          <button
+          <motion.button
             type="button"
             onClick={() => void handleGoogleLogin()}
             disabled={loggingIn}
+            whileHover={shouldReduceMotion || loggingIn ? undefined : { y: -1, scale: 1.01 }}
+            whileTap={shouldReduceMotion || loggingIn ? undefined : { scale: 0.98 }}
             className="font-heading mt-6 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-[1.5px] border-[#DDD] bg-white px-4 py-3 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">
@@ -98,8 +107,8 @@ export default function LoginPage() {
               />
             </svg>
             {loggingIn ? 'Connecting...' : 'Continue with Google'}
-          </button>
-        </article>
+          </motion.button>
+        </motion.article>
       </section>
     </main>
   );

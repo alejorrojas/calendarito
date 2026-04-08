@@ -18,6 +18,7 @@ interface EventRow {
   allDay: boolean;
   startTime?: string;
   endTime?: string;
+  colorId?: string;
 }
 
 const COLOR_MAP: Record<string, string> = {
@@ -57,8 +58,6 @@ function toTemporalEnd(dateOnly: string, allDay: boolean, time?: string) {
 }
 
 export default function CalendarPreview({ events, colorId }: Props) {
-  const color = COLOR_MAP[colorId] ?? '#8e24aa';
-
   const calendarEvents = useMemo(
     () =>
       events.reduce<Array<{ id: string; title: string; start: unknown; end: unknown; calendarId: string }>>(
@@ -67,19 +66,35 @@ export default function CalendarPreview({ events, colorId }: Props) {
           if (!dateOnly) return acc;
 
           const isAllDay = event.allDay !== false;
+          const eventColorId = event.colorId ?? colorId;
           acc.push({
             id: String(index),
             title: event.summary,
             start: toTemporalStart(dateOnly, isAllDay, event.startTime),
             end: toTemporalEnd(dateOnly, isAllDay, event.endTime),
-            calendarId: 'preview',
+            calendarId: `preview-${eventColorId}`,
           });
           return acc;
         },
         []
       ),
-    [events]
+    [events, colorId]
   );
+
+  const calendars = useMemo(() => {
+    const ids = new Set(events.map((event) => event.colorId ?? colorId));
+    const entries = Array.from(ids).map((id) => {
+      const hex = COLOR_MAP[id] ?? '#8e24aa';
+      return [
+        `preview-${id}`,
+        {
+          colorName: `preview-${id}`,
+          lightColors: { main: hex, container: `${hex}22`, onContainer: hex },
+        },
+      ] as const;
+    });
+    return Object.fromEntries(entries);
+  }, [events, colorId]);
 
   const calendarApp = useNextCalendarApp({
     views: [createViewMonthGrid()],
@@ -87,12 +102,8 @@ export default function CalendarPreview({ events, colorId }: Props) {
     plugins: [createEventModalPlugin()],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     events: calendarEvents as any,
-    calendars: {
-      preview: {
-        colorName: 'preview',
-        lightColors: { main: color, container: `${color}22`, onContainer: color },
-      },
-    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    calendars: calendars as any,
   });
 
   return (
