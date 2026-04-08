@@ -30,11 +30,11 @@
   animation: 240ms ease-in both fade-in;
 }
 
-::view-transition-old(cta-empezar) {
+::view-transition-old(cta-get-started) {
   animation: 140ms ease-out both fade-out;
 }
 
-::view-transition-new(cta-empezar) {
+::view-transition-new(cta-get-started) {
   animation: 260ms ease-in both fade-in;
 }
 
@@ -63,8 +63,8 @@
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root),
   ::view-transition-new(root),
-  ::view-transition-old(cta-empezar),
-  ::view-transition-new(cta-empezar) {
+  ::view-transition-old(cta-get-started),
+  ::view-transition-new(cta-get-started) {
     animation: none;
   }
 }

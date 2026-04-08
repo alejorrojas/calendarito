@@ -9,7 +9,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 function getSafeNextPath(next: string | null): string {
   if (!next || !next.startsWith('/')) {
-    return '/empezar';
+    return '/get-started';
   }
 
   return next;

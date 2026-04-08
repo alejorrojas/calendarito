@@ -438,7 +438,7 @@ export default function EmpezarPage() {
   return (
     <main className="flex min-h-screen flex-col bg-[var(--bg-home)] pt-[68px]">
 
-      {/* Nav — same floating pill as home/como-funciona */}
+      {/* Nav — same floating pill as home/how-it-works */}
       <div className="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-home)] px-6 pt-4 pb-0">
         <nav className="mx-auto flex w-full max-w-[900px] items-center justify-between rounded-full bg-white px-4 py-2.5 pl-5 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
           <Link href="/" className="flex items-center gap-2 no-underline">
@@ -452,7 +452,7 @@ export default function EmpezarPage() {
           <div className="flex items-center gap-2">
             {authenticated === false && (
               <Link
-                href="/login?next=/empezar"
+                href="/login?next=/get-started"
                 className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
               >
                 Login
@@ -786,7 +786,7 @@ Dinner with Valentina on May 12`}
               {!authenticated ? (
                 <div className="space-y-3">
                   <button
-                    onClick={() => { window.location.href = '/login?next=/empezar'; }}
+                    onClick={() => { window.location.href = '/login?next=/get-started'; }}
                     disabled={events.length === 0}
                     className="font-heading w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3.5 text-[15px] font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
                   >

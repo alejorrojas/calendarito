@@ -37,7 +37,7 @@ export default function HomePage() {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  const ctaHref = '/empezar';
+  const ctaHref = '/get-started';
   const ctaLabel = 'Start free';
   const heroContainer = {
     hidden: { opacity: 0 },
@@ -68,14 +68,14 @@ export default function HomePage() {
           <div className="flex items-center">
             {authenticated ? (
               <Link
-                href="/empezar"
+                href="/get-started"
                 className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
               >
                 Go to app
               </Link>
             ) : (
               <Link
-                href="/login?next=/empezar"
+                href="/login?next=/get-started"
                 className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
               >
                 Login
@@ -121,14 +121,14 @@ export default function HomePage() {
           <motion.div whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }} whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}>
             <Link
               href={ctaHref}
-              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#E8E815] px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512] [view-transition-name:cta-empezar]"
+              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#E8E815] px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512] [view-transition-name:cta-get-started]"
             >
               {ctaLabel}
             </Link>
           </motion.div>
           <motion.div whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }} whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}>
             <Link
-              href="/como-funciona"
+              href="/how-it-works"
               className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
             >
               See how it works

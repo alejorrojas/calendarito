@@ -32,7 +32,7 @@ export default function TermsPage() {
               Home
             </Link>
             <Link
-              href="/empezar"
+              href="/get-started"
               className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
             >
               Start

@@ -19,7 +19,7 @@ const steps = [
   },
 ];
 
-export default function ComoFuncionaPage() {
+export default function HowItWorksPage() {
   const shouldReduceMotion = useReducedMotion();
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -46,7 +46,7 @@ export default function ComoFuncionaPage() {
             <span className="font-heading text-[15px] font-bold tracking-[-0.03em]">Calendarito</span>
           </Link>
           <Link
-            href="/login?next=/empezar"
+            href="/login?next=/get-started"
             className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
           >
             Login
