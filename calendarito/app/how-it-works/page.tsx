@@ -80,8 +80,8 @@ export default function HowItWorksPage() {
           <Image
             src="/mapa-how.png"
             alt="Calendarito flow map"
-            width={1024}
-            height={576}
+            width={500}
+            height={375}
             className="block h-auto w-full"
           />
         </div>
