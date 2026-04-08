@@ -703,7 +703,7 @@ Dinner with Valentina on May 12`}
                           setCalendarId('');
                           setNewCalendarName('');
                         } else {
-                          setCalendarId(val);
+                          setCalendarId(val ?? '');
                           setNewCalendarName('');
                         }
                       }}
