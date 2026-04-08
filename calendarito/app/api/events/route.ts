@@ -70,8 +70,9 @@ export async function POST(req: NextRequest) {
 
       if (isTimed && row.startTime) {
         const endTime = row.endTime ?? row.startTime;
-        start = { dateTime: `${row.date}T${row.startTime}:00`, ...(row.timezone ? { timeZone: row.timezone } : {}) };
-        end = { dateTime: `${row.date}T${endTime}:00`, ...(row.timezone ? { timeZone: row.timezone } : {}) };
+        const tz = row.timezone ?? 'UTC';
+        start = { dateTime: `${row.date}T${row.startTime}:00`, timeZone: tz };
+        end = { dateTime: `${row.date}T${endTime}:00`, timeZone: tz };
       } else {
         start = { date: row.date };
         end = { date: nextDay(row.date) };
