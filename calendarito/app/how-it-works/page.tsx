@@ -76,16 +76,20 @@ export default function HowItWorksPage() {
           Calendar.
         </p>
 
-        <div className="mx-auto w-full max-w-[500px] overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
-          <Image
-            src="/hero-2.png"
-            alt="Character organizing a calendar"
-            width={500}
-            height={375}
-            quality={100}
-            priority
-            className="block h-auto w-full"
-          />
+        <div className="group relative mx-auto w-full max-w-[500px]">
+          {/* Golden glow on hover */}
+          <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[#E8E815] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40" />
+          <div className="relative overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] transition-shadow duration-500 group-hover:shadow-[0_24px_80px_rgba(232,232,21,0.25)]">
+            <Image
+              src="/hero-2.png"
+              alt="Character organizing a calendar"
+              width={500}
+              height={375}
+              quality={100}
+              priority
+              className="block h-auto w-full"
+            />
+          </div>
         </div>
       </section>
 

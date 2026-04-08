@@ -5,221 +5,421 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-heading: var(--font-poppins), sans-serif;
-  --font-body:    var(--font-inter), sans-serif;
-  --yellow:       #E8E815;
-  --yellow-hover: #d4d512;
-  --bg-home:      #E8E8E8;
-  --bg-app:       #F2F2F2;
-  --card: oklch(1 0 0);
-  --border: oklch(0.922 0 0);
-  --text:         #0A0A0A;
-  --muted: oklch(0.97 0 0);
-  --dot:          #D0D0D0;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+    --font-heading: var(--font-poppins), sans-serif;
+    --font-body: var(--font-inter), sans-serif;
+    --yellow: #e8e815;
+    --yellow-hover: #d4d512;
+    --bg-home: #e8e8e8;
+    --bg-app: #f2f2f2;
+    --card: oklch(1 0 0);
+    --border: oklch(0.922 0 0);
+    --text: #0a0a0a;
+    --muted: oklch(0.97 0 0);
+    --dot: #d0d0d0;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
 }
 
 @utility font-heading {
-  font-family: var(--font-heading);
+    font-family: var(--font-heading);
 }
 
 @utility font-body {
-  font-family: var(--font-body);
+    font-family: var(--font-body);
 }
 
 ::view-transition-old(root) {
-  animation: 180ms ease-out both fade-out;
+    animation: 180ms ease-out both fade-out;
 }
 
 ::view-transition-new(root) {
-  animation: 240ms ease-in both fade-in;
+    animation: 240ms ease-in both fade-in;
 }
 
 ::view-transition-old(cta-get-started) {
-  animation: 140ms ease-out both fade-out;
+    animation: 140ms ease-out both fade-out;
 }
 
 ::view-transition-new(cta-get-started) {
-  animation: 260ms ease-in both fade-in;
+    animation: 260ms ease-in both fade-in;
 }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes fade-out {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root),
-  ::view-transition-old(cta-get-started),
-  ::view-transition-new(cta-get-started) {
-    animation: none;
-  }
+    ::view-transition-old(root),
+    ::view-transition-new(root),
+    ::view-transition-old(cta-get-started),
+    ::view-transition-new(cta-get-started) {
+        animation: none;
+    }
 }
 
-/* Make Schedule-X frame match app card borders/radius. */
+/* ── Schedule-X minimal reskin ────────────────────────────── */
 .calendar-preview-shell .sx__calendar-wrapper .sx__calendar {
-  border: 1px solid #ececec !important;
-  border-radius: 1rem !important;
+    border: 1px solid #f0f0f0 !important;
+    border-radius: 1rem !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+    font-family: inherit !important;
+}
+
+/* Header */
+.calendar-preview-shell .sx__calendar-header {
+    background: #fff !important;
+    border-bottom: none !important;
+    padding: 10px 14px 8px !important;
+}
+
+.calendar-preview-shell .sx__calendar-header__title {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0a0a0a !important;
+    letter-spacing: -0.02em !important;
+}
+
+.calendar-preview-shell .sx__calendar-header__content button,
+.calendar-preview-shell .sx__calendar-header__content span {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0a0a0a !important;
+}
+
+.calendar-preview-shell .sx__chevron-wrapper svg {
+    color: #bbb !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+
+/* "April 2026" heading */
+.calendar-preview-shell .sx__range-heading {
+    font-family: inherit !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    color: #0a0a0a !important;
+    letter-spacing: -0.03em !important;
+}
+
+/* "Today" button */
+.calendar-preview-shell .sx__today-button {
+    font-family: inherit !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #0a0a0a !important;
+    background: transparent !important;
+    border: 1.5px solid #e0e0e0 !important;
+    border-radius: 999px !important;
+    padding: 4px 12px !important;
+    box-shadow: none !important;
+    transition: border-color 0.15s !important;
+}
+
+.calendar-preview-shell .sx__today-button:hover {
+    border-color: #0a0a0a !important;
+}
+
+/* Prev / next chevron buttons */
+.calendar-preview-shell .sx__button {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 999px !important;
+}
+
+.calendar-preview-shell .sx__button:hover {
+    background: #f5f5f5 !important;
+}
+
+/* Date input wrapper */
+.calendar-preview-shell .sx__date-input-wrapper {
+    margin-top: 5px !important;
+}
+
+/* Date input */
+.calendar-preview-shell .sx__date-input {
+    font-family: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #0a0a0a !important;
+    background: #fff !important;
+    border: 1.5px solid #e0e0e0 !important;
+    border-radius: 10px !important;
+    padding: 5px 10px !important;
+    margin-top: 10px !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.calendar-preview-shell .sx__date-input:hover,
+.calendar-preview-shell .sx__date-input:focus-within {
+    border-color: #0a0a0a !important;
+}
+
+/* Hide the "Date" fieldset legend */
+.calendar-preview-shell .sx__date-input legend,
+.calendar-preview-shell .sx__date-input fieldset > legend {
+    display: none !important;
+    margin-top: 10px !important;
+}
+
+/* Day-name row */
+.calendar-preview-shell .sx__month-grid-day-names-header {
+    background: #fff !important;
+    border-bottom: 1px solid #f5f5f5 !important;
+}
+
+.calendar-preview-shell .sx__month-grid-day-names-header > div {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    color: #bbbbbb !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    padding: 6px 0 !important;
+}
+
+/* Day cells */
+.calendar-preview-shell .sx__month-grid-day {
+    border-color: #f5f5f5 !important;
+    background: #fff !important;
+    min-height: 80px !important;
+}
+
+.calendar-preview-shell .sx__month-grid-day:hover {
+    background: #fafafa !important;
+}
+
+/* Day number */
+.calendar-preview-shell .sx__month-grid-day__header-date {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #cccccc !important;
+    width: 22px !important;
+    height: 22px !important;
+    border-radius: 50% !important;
+    margin: 4px 4px 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.calendar-preview-shell
+    .sx__month-grid-day__header-date:has(
+        + .sx__month-grid-day__events .sx__event
+    ) {
+    color: #0a0a0a !important;
+    font-weight: 700 !important;
+}
+
+.calendar-preview-shell .sx__month-grid-day__header-date--today,
+.calendar-preview-shell .sx__month-grid-day__header-date.sx__is-today {
+    background-color: #e8e815 !important;
+    color: #0a0a0a !important;
+    font-weight: 800 !important;
+}
+
+/* Events */
+.calendar-preview-shell .sx__event {
+    border-radius: 6px !important;
+    padding: 2px 6px 2px 5px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    border: none !important;
+    box-shadow: none !important;
+    letter-spacing: -0.01em !important;
+    margin-bottom: 2px !important;
+}
+
+.calendar-preview-shell .sx__event-title {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+}
+
+.calendar-preview-shell .sx__event-time {
+    display: none !important;
+}
+
+/* Remove weekend dimming */
+.calendar-preview-shell .sx__month-grid-day--weekend {
+    background: #fff !important;
+}
+
+.calendar-preview-shell .sx__month-grid-day--outside-month {
+    background: #fafafa !important;
+}
+
+.calendar-preview-shell .sx__month-grid-day__header-date--outside-month {
+    color: #e5e5e5 !important;
 }
 
 /* Scale down the date-picker popup to match the calendar proportions. */
 .sx__date-picker-popup {
-  width: 16rem !important;
-  padding: 10px !important;
+    width: 16rem !important;
+    padding: 10px !important;
 }
+
 .sx__date-picker__month-view-header {
-  margin-bottom: 0.5em !important;
+    margin-bottom: 0.5em !important;
 }
+
 .sx__date-picker__month-view-header__month-year {
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    font-weight: 600 !important;
 }
+
 .sx__date-picker__day {
-  width: 1.9rem !important;
-  height: 1.9rem !important;
-  font-size: 0.75rem !important;
+    width: 1.9rem !important;
+    height: 1.9rem !important;
+    font-size: 0.75rem !important;
 }
+
 .sx__date-picker__day-name {
-  font-size: 0.7rem !important;
+    font-size: 0.7rem !important;
 }
+
 .sx__date-picker__week {
-  margin-bottom: 0.15em !important;
+    margin-bottom: 0.15em !important;
 }
+
 .sx__date-picker__day-names {
-  margin-bottom: 0.25em !important;
+    margin-bottom: 0.25em !important;
 }
 
 @theme inline {
-  --font-heading: var(--font-sans);
-  --font-sans: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-  --color-foreground: var(--foreground);
-  --color-background: var(--background);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+    --font-heading: var(--font-sans);
+    --font-sans: var(--font-sans);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.922 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.556 0 0);
+    --chart-1: oklch(0.87 0 0);
+    --chart-2: oklch(0.556 0 0);
+    --chart-3: oklch(0.439 0 0);
+    --chart-4: oklch(0.371 0 0);
+    --chart-5: oklch(0.269 0 0);
+    --sidebar: oklch(0.205 0 0);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.269 0 0);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
-  }
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+
+    html {
+        @apply font-sans;
+    }
 }

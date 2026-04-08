@@ -6,16 +6,25 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 type Phase = "upload" | "image-ready" | "sending" | "processing" | "calendar";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-const HOURS = ["9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", "3 PM", "4 PM"];
+const HOURS = [
+  "9 AM",
+  "10 AM",
+  "11 AM",
+  "12 PM",
+  "1 PM",
+  "2 PM",
+  "3 PM",
+  "4 PM",
+];
 
 type CalEvent = { day: string; hour: string; label: string };
 
 const EVENTS: CalEvent[] = [
-  { day: "Mon", hour: "9 AM",  label: "Math exam"    },
-  { day: "Tue", hour: "11 AM", label: "Physics"      },
-  { day: "Wed", hour: "2 PM",  label: "History"      },
-  { day: "Thu", hour: "10 AM", label: "Chemistry"    },
-  { day: "Fri", hour: "3 PM",  label: "Literature"   },
+  { day: "Mon", hour: "9 AM", label: "Math exam" },
+  { day: "Tue", hour: "11 AM", label: "Physics" },
+  { day: "Wed", hour: "2 PM", label: "History" },
+  { day: "Thu", hour: "10 AM", label: "Chemistry" },
+  { day: "Fri", hour: "3 PM", label: "Literature" },
 ];
 
 function ChatImagePreview() {
@@ -31,7 +40,9 @@ function ChatImagePreview() {
             S
           </div>
           <div className="flex-1 min-w-0 text-left">
-            <p className="text-[10px] font-bold leading-tight text-white">Santi</p>
+            <p className="text-[10px] font-bold leading-tight text-white">
+              Santiago
+            </p>
             <p className="text-[8px] text-white/60">online</p>
           </div>
           <span className="text-[9px] text-white/50">9:41</span>
@@ -47,14 +58,19 @@ function ChatImagePreview() {
               </p>
               <div className="mt-1.5 space-y-[3px]">
                 {[
-                  { day: "Mon",  label: "Math"      },
-                  { day: "Tue",  label: "Physics"   },
-                  { day: "Wed",  label: "History"   },
-                  { day: "Thu",  label: "Chemistry" },
-                  { day: "Fri",  label: "Literature"},
+                  { day: "Mon", label: "Math" },
+                  { day: "Tue", label: "Physics" },
+                  { day: "Wed", label: "History" },
+                  { day: "Thu", label: "Chemistry" },
+                  { day: "Fri", label: "Literature" },
                 ].map(({ day, label }) => (
-                  <div key={day} className="flex items-center gap-1.5 text-left">
-                    <span className="w-6 shrink-0 text-[9px] font-semibold text-[#333]">{day}</span>
+                  <div
+                    key={day}
+                    className="flex items-center gap-1.5 text-left"
+                  >
+                    <span className="w-6 shrink-0 text-[9px] font-semibold text-[#333]">
+                      {day}
+                    </span>
                     <span className="text-[9px] text-[#444]">→ {label}</span>
                   </div>
                 ))}
@@ -162,12 +178,34 @@ export function CalendarImageDemoAnimation() {
                 >
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#F5F5F5]">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <rect x="3" y="3" width="18" height="18" rx="3" stroke="#BBBBBB" strokeWidth="1.8"/>
-                      <circle cx="8.5" cy="8.5" r="1.5" stroke="#BBBBBB" strokeWidth="1.5"/>
-                      <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#BBBBBB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="3"
+                        stroke="#BBBBBB"
+                        strokeWidth="1.8"
+                      />
+                      <circle
+                        cx="8.5"
+                        cy="8.5"
+                        r="1.5"
+                        stroke="#BBBBBB"
+                        strokeWidth="1.5"
+                      />
+                      <path
+                        d="M3 16l5-5 4 4 3-3 6 6"
+                        stroke="#BBBBBB"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
                     </svg>
                   </div>
-                  <p className="text-sm text-[#BBBBBB]">Drop a screenshot of your chat</p>
+                  <p className="text-sm text-[#BBBBBB]">
+                    Drop a screenshot of your chat
+                  </p>
                 </motion.div>
               ) : (
                 <motion.div
@@ -181,17 +219,44 @@ export function CalendarImageDemoAnimation() {
                   {/* File row */}
                   <div className="mb-3 flex items-center gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <rect x="3" y="3" width="18" height="18" rx="3" stroke="#3B82F6" strokeWidth="1.8"/>
-                        <circle cx="8.5" cy="8.5" r="1.5" stroke="#3B82F6" strokeWidth="1.5"/>
-                        <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#3B82F6" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="18"
+                          height="18"
+                          rx="3"
+                          stroke="#3B82F6"
+                          strokeWidth="1.8"
+                        />
+                        <circle
+                          cx="8.5"
+                          cy="8.5"
+                          r="1.5"
+                          stroke="#3B82F6"
+                          strokeWidth="1.5"
+                        />
+                        <path
+                          d="M3 16l5-5 4 4 3-3 6 6"
+                          stroke="#3B82F6"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
                       </svg>
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-[#0A0A0A]">
                         chat_exams.jpg
                       </p>
-                      <p className="text-xs text-[#AAAAAA]">1.2 MB · Ready to send</p>
+                      <p className="text-xs text-[#AAAAAA]">
+                        1.2 MB · Ready to send
+                      </p>
                     </div>
 
                     <motion.button
@@ -200,14 +265,24 @@ export function CalendarImageDemoAnimation() {
                         phase === "sending"
                           ? {
                               scale: [1, 0.82, 1.05, 1],
-                              backgroundColor: ["#E8E815", "#d4d410", "#E8E815", "#E8E815"],
+                              backgroundColor: [
+                                "#E8E815",
+                                "#d4d410",
+                                "#E8E815",
+                                "#E8E815",
+                              ],
                             }
                           : {}
                       }
                       transition={{ duration: 0.4, ease: "easeInOut" }}
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E8E815]"
                     >
-                      <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 14 14"
+                        fill="none"
+                      >
                         <path
                           d="M7 11V3M7 3L3.5 6.5M7 3L10.5 6.5"
                           stroke="#0A0A0A"
@@ -228,14 +303,18 @@ export function CalendarImageDemoAnimation() {
                       <motion.div
                         initial={{ opacity: 0, height: 0, marginTop: 0 }}
                         animate={{ opacity: 1, height: "auto", marginTop: 10 }}
-                        className="flex items-center gap-1.5 px-1"
+                        className="flex items-center gap-1.5"
                       >
                         <p className="text-xs text-[#AAAAAA]">Reading image</p>
                         {[0, 1, 2].map((i) => (
                           <motion.span
                             key={i}
                             animate={{ opacity: [0.2, 1, 0.2] }}
-                            transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.18 }}
+                            transition={{
+                              repeat: Infinity,
+                              duration: 0.8,
+                              delay: i * 0.18,
+                            }}
                             className="inline-block h-1 w-1 rounded-full bg-[#AAAAAA]"
                           />
                         ))}
@@ -248,7 +327,11 @@ export function CalendarImageDemoAnimation() {
 
             {/* Hints */}
             <div className="mt-2.5 flex flex-wrap gap-1.5 px-1">
-              {["Math exam next tuesday", "Lunch w/ Ana tomorrow", "Upload a file"].map((hint) => (
+              {[
+                "Study group thursday 6pm",
+                "Exam next tuesday 9am",
+                "Library until 8pm",
+              ].map((hint) => (
                 <span
                   key={hint}
                   className="rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[11px] text-[#AAAAAA]"
@@ -270,7 +353,9 @@ export function CalendarImageDemoAnimation() {
               <div className="w-12" />
               {DAYS.map((day) => (
                 <div key={day} className="flex-1 text-center">
-                  <span className={`text-[11px] font-bold ${day === "Mon" ? "text-[#0A0A0A]" : "text-[#BBBBBB]"}`}>
+                  <span
+                    className={`text-[11px] font-bold ${day === "Mon" ? "text-[#0A0A0A]" : "text-[#BBBBBB]"}`}
+                  >
                     {day}
                   </span>
                 </div>
@@ -278,7 +363,12 @@ export function CalendarImageDemoAnimation() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: EVENTS.length * 0.5 + 0.4, type: "spring", stiffness: 500, damping: 22 }}
+                transition={{
+                  delay: EVENTS.length * 0.5 + 0.4,
+                  type: "spring",
+                  stiffness: 500,
+                  damping: 22,
+                }}
                 className="ml-3 flex items-center gap-1.5 rounded-full bg-[#E8E815]/25 px-2.5 py-1"
               >
                 <div className="h-1.5 w-1.5 rounded-full bg-[#9A9A00]" />
@@ -308,7 +398,11 @@ export function CalendarImageDemoAnimation() {
                             <motion.div
                               initial={{ opacity: 0, scale: 0.75, y: 6 }}
                               animate={{ opacity: 1, scale: 1, y: 0 }}
-                              transition={{ type: "spring", stiffness: 380, damping: 22 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 380,
+                                damping: 22,
+                              }}
                               className="absolute inset-[3px] rounded-lg bg-[#E8E815] px-2 py-1.5 shadow-sm"
                             >
                               <p className="text-[10px] font-black leading-tight text-[#0A0A0A]">

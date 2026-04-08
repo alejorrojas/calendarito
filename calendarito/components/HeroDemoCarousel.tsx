@@ -10,9 +10,17 @@ import { CalendarImageDemoAnimation } from "@/components/CalendarImageDemoAnimat
 const SLIDE_DURATIONS = [9500, 17000, 14000];
 
 const slides = [
-  { key: "text",  label: "Type it in natural language",     Component: CalendarDemoAnimation      },
-  { key: "pdf",   label: "Upload a PDF or document",        Component: CalendarPDFDemoAnimation   },
-  { key: "image", label: "Share a photo or screenshot",     Component: CalendarImageDemoAnimation },
+  {
+    key: "text",
+    label: "Type it in natural language",
+    Component: CalendarDemoAnimation,
+  },
+  { key: "pdf", label: "Upload any file", Component: CalendarPDFDemoAnimation },
+  {
+    key: "image",
+    label: "Share a photo or screenshot",
+    Component: CalendarImageDemoAnimation,
+  },
 ];
 
 export function HeroDemoCarousel() {
@@ -59,16 +67,22 @@ export function HeroDemoCarousel() {
       </AnimatePresence>
 
       {/* Dot indicators */}
-      <div className="mt-4 flex justify-center gap-2">
+      <div className="mt-4 flex justify-center gap-0">
         {slides.map((_, i) => (
           <button
             key={i}
             onClick={() => setActive(i)}
             aria-label={`Show demo ${i + 1}`}
-            className={`h-[5px] rounded-full transition-all duration-300 ${
-              i === active ? "w-5 bg-[#0A0A0A]" : "w-[5px] bg-[#CCCCCC]"
-            }`}
-          />
+            className="flex cursor-pointer items-center justify-center p-2"
+          >
+            <span
+              className={`block h-[5px] rounded-full transition-all duration-300 ${
+                i === active
+                  ? "w-5 bg-[#0A0A0A]"
+                  : "w-[5px] bg-[#CCCCCC] hover:bg-[#999]"
+              }`}
+            />
+          </button>
         ))}
       </div>
     </div>

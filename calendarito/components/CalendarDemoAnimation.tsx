@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
-const PROMPT = "Team sync next mon 10 am";
+const PROMPT = "Dinner tomorrow with Ann";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const HOURS = ["9 AM", "10 AM", "11 AM", "12 PM", "1 PM"];
 
@@ -88,7 +88,7 @@ export function CalendarDemoAnimation() {
             className="p-4"
           >
             {/* Input row */}
-            <div className="flex items-end gap-3 rounded-2xl border border-[#E8E8E8] bg-white px-4 py-3 shadow-sm">
+            <div className="flex items-center gap-3 rounded-2xl border border-[#E8E8E8] bg-white px-4 py-3 shadow-sm">
               <div className="relative flex-1 min-h-[22px]">
                 {/* Placeholder */}
                 {typedText === "" && (
@@ -96,9 +96,7 @@ export function CalendarDemoAnimation() {
                     What&apos;s on your schedule?
                   </span>
                 )}
-                <span className="text-sm text-[#0A0A0A]">
-                  {typedText}
-                </span>
+                <span className="text-sm text-[#0A0A0A]">{typedText}</span>
                 {/* blinking cursor */}
                 <motion.span
                   animate={{ opacity: [1, 0, 1] }}
@@ -139,8 +137,12 @@ export function CalendarDemoAnimation() {
             </div>
 
             {/* Example hints */}
-            <div className="mt-2.5 flex flex-wrap gap-1.5 px-1">
-              {["Math exam next tuesday", "Lunch w/ Ana tomorrow", "Upload a file"].map((hint) => (
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
+              {[
+                "Franciscos Birthday part friday night",
+                "Doctor appt next tuesday",
+                "House tour wed 22",
+              ].map((hint) => (
                 <span
                   key={hint}
                   className="rounded-full bg-[#F5F5F5] px-2.5 py-1 text-[11px] text-[#AAAAAA]"
@@ -205,9 +207,9 @@ export function CalendarDemoAnimation() {
                           className="absolute inset-[3px] rounded-lg bg-[#E8E815] px-2 py-1 shadow-sm"
                         >
                           <p className="text-[10px] font-black leading-tight text-[#0A0A0A]">
-                            Team sync
+                            Dinner w/ Ann
                           </p>
-                          <p className="text-[9px] text-[#555555]">10:00 AM</p>
+                          <p className="text-[9px] text-[#555555]">Tomorrow</p>
                         </motion.div>
                       )}
                     </div>
@@ -247,9 +249,9 @@ export function CalendarDemoAnimation() {
                 </motion.div>
                 <p className="text-[11px] text-[#666]">
                   <span className="font-semibold text-[#0A0A0A]">
-                    Team sync
+                    Dinner w/ Ann
                   </span>{" "}
-                  added to your calendar — Monday, 10 AM
+                  added to your calendar — Tomorrow
                 </p>
               </div>
             </motion.div>

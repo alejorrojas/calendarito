@@ -204,7 +204,7 @@ export function CalendarPDFDemoAnimation() {
                       <motion.div
                         initial={{ opacity: 0, height: 0, marginTop: 0 }}
                         animate={{ opacity: 1, height: "auto", marginTop: 10 }}
-                        className="flex items-center gap-1.5 px-1"
+                        className="flex items-center gap-1.5"
                       >
                         <p className="text-xs text-[#AAAAAA]">Extracting events</p>
                         {[0, 1, 2].map((i) => (
@@ -227,11 +227,11 @@ export function CalendarPDFDemoAnimation() {
             </AnimatePresence>
 
             {/* Hints */}
-            <div className="mt-2.5 flex flex-wrap gap-1.5 px-1">
+            <div className="mt-2.5 flex flex-wrap gap-1.5">
               {[
-                "Math exam next tuesday",
-                "Lunch w/ Ana tomorrow",
-                "Upload a file",
+                "All-hands next monday",
+                "Sprint review thursday",
+                "1:1 with Sara fri 3pm",
               ].map((hint) => (
                 <span
                   key={hint}
