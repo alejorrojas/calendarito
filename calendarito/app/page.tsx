@@ -118,17 +118,15 @@ export default function HomePage() {
           }
           className="mx-auto mb-7 max-w-[820px] font-heading text-[clamp(44px,7vw,72px)] leading-[1.05] font-black tracking-[-0.04em] text-[#0A0A0A]"
         >
-          Drop in anything,
+          Drop or type anything,
           <br />
-          get{" "}
+          get events in your{" "}
           <span className="relative inline-block pb-2">
-            calendar
+            Calendar
             <span className="pointer-events-none absolute right-0 bottom-0 left-0">
               <WavySVG />
             </span>
           </span>
-          <br />
-          events
         </motion.h1>
 
         <motion.p
@@ -140,8 +138,8 @@ export default function HomePage() {
           }
           className="mx-auto mb-10 max-w-[460px] text-lg leading-[1.6] text-[#555]"
         >
-          Use natural language, files, PDFs, or images. Share anything you want,
-          and we handle the rest to create events in your Google Calendar.
+          Create events in your Google Calendar, using natural language, files,
+          or images. Share anything you want, and we handle the rest.
         </motion.p>
 
         <motion.div
@@ -182,10 +180,11 @@ export default function HomePage() {
           className="mb-16 w-full max-w-[500px] overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]"
         >
           <Image
-            src="/hero-2.png"
+            src="/hero-3.png"
             alt="Character organizing a calendar"
             width={500}
             height={375}
+            quality={100}
             className="block h-auto w-full"
             priority
           />
