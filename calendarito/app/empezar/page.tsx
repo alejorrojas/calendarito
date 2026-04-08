@@ -251,14 +251,14 @@ export default function EmpezarPage() {
         body: JSON.stringify({ name: newCalendarName.trim(), googleAccessToken, supabaseAccessToken }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'Error al crear el calendario');
+      if (!res.ok) throw new Error(data.error ?? 'Error creating calendar');
       const created = data.calendar as Calendar;
       setCalendars(prev => [...prev, created]);
       setCalendarId(created.id);
       setCreatingNewCalendar(false);
       setNewCalendarName('');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear el calendario');
+      setError(err instanceof Error ? err.message : 'Error creating calendar');
     } finally { setCreatingCalendar(false); }
   }
 
@@ -274,12 +274,12 @@ export default function EmpezarPage() {
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? 'No se pudo extraer eventos');
+      if (!res.ok) throw new Error(data.error ?? 'Could not extract events');
       setEvents(data.events ?? []);
       setExtractWarnings(data.warnings ?? []);
-      if (!data.events?.length) setExtractError('No encontramos eventos claros en la fuente enviada.');
+      if (!data.events?.length) setExtractError('We could not find clear events in the provided source.');
     } catch (err) {
-      setExtractError(err instanceof Error ? err.message : 'Error procesando la fuente con IA');
+      setExtractError(err instanceof Error ? err.message : 'Error processing source with AI');
     } finally { setExtracting(false); }
   }
 
@@ -293,8 +293,8 @@ export default function EmpezarPage() {
   }
 
   async function handleAnalyzeText() {
-    if (!inputText.trim()) { setExtractError('Escribí algo para poder extraer eventos.'); return; }
-    setSourceSummary('Texto libre');
+    if (!inputText.trim()) { setExtractError('Write something so we can extract events.'); return; }
+    setSourceSummary('Natural language');
     await extractWithAI({ sourceType: 'text', inputText: inputText.trim() });
   }
 
@@ -313,7 +313,7 @@ export default function EmpezarPage() {
       setResult(data.created);
       window.localStorage.removeItem(EVENTS_STORAGE_KEY);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear los eventos');
+      setError(err instanceof Error ? err.message : 'Error creating events');
     } finally { setLoading(false); }
   }
 
@@ -338,7 +338,7 @@ export default function EmpezarPage() {
                 disabled={loggingIn}
                 className="font-heading inline-flex cursor-pointer items-center gap-2 rounded-full border-[1.5px] border-[#DDD] bg-white px-4 py-2 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A] disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Conectar con Google
+                Connect with Google
               </button>
             )}
             {authenticated === true && (
@@ -346,7 +346,7 @@ export default function EmpezarPage() {
                 onClick={handleLogout}
                 className="font-heading cursor-pointer rounded-full border-[1.5px] border-[#DDD] bg-white px-4 py-2 text-sm font-semibold text-[#0A0A0A] transition-colors hover:border-[#0A0A0A]"
               >
-                Cerrar sesión
+                Sign out
               </button>
             )}
           </div>
@@ -368,7 +368,7 @@ export default function EmpezarPage() {
           )}
           {extractWarnings.length > 0 && (
             <div className="mb-4 rounded-2xl border border-[#FFE082] bg-[#FFF9E6] px-4 py-3 text-[13px] text-[#8A6D1A]">
-              <p className="font-heading mb-1 text-sm font-semibold">Advertencias</p>
+              <p className="font-heading mb-1 text-sm font-semibold">Warnings</p>
               <ul className="space-y-0.5">
                 {extractWarnings.map((w, i) => <li key={i}>— {w}</li>)}
               </ul>
@@ -379,7 +379,7 @@ export default function EmpezarPage() {
             <div className="flex flex-col gap-3">
 
               {/* Step 1 */}
-              <StepCard num={1} title="Fuente de eventos">
+              <StepCard num={1} title="Event source">
                 <div className="mb-3 flex gap-2">
                   {(['file', 'text'] as const).map(t => (
                     <button
@@ -390,7 +390,7 @@ export default function EmpezarPage() {
                         sourceType === t ? 'bg-[#0A0A0A] text-white' : 'border border-[#DDD] bg-white text-[#555] hover:border-[#0A0A0A]'
                       }`}
                     >
-                      {t === 'file' ? 'Subir archivo' : 'Escribir texto'}
+                      {t === 'file' ? 'Upload file' : 'Write text'}
                     </button>
                   ))}
                 </div>
@@ -404,12 +404,12 @@ export default function EmpezarPage() {
                       }`}
                     >
                       {extracting
-                        ? <p className="font-heading text-sm font-bold text-[#0A0A0A]">Extrayendo eventos con IA...</p>
+                        ? <p className="font-heading text-sm font-bold text-[#0A0A0A]">Extracting events with AI...</p>
                         : events.length > 0 && sourceSummary
-                        ? <p className="font-heading text-sm font-bold text-[#15803D]">✓ {events.length} eventos extraídos de {sourceSummary}</p>
+                        ? <p className="font-heading text-sm font-bold text-[#15803D]">✓ {events.length} events extracted from {sourceSummary}</p>
                         : <>
-                            <p className="font-heading mb-1 text-sm font-semibold text-[#0A0A0A]">Elegir un archivo o imagen</p>
-                            <p className="text-xs text-[#999]">PDF, imagen, cualquier formato.</p>
+                            <p className="font-heading mb-1 text-sm font-semibold text-[#0A0A0A]">Choose a file, PDF, or image</p>
+                            <p className="text-xs text-[#999]">Any format works.</p>
                           </>
                       }
                     </div>
@@ -423,7 +423,7 @@ export default function EmpezarPage() {
                       value={inputText}
                       onChange={e => setInputText(e.target.value)}
                       rows={5}
-                      placeholder="Escribí tus eventos en lenguaje natural..."
+                      placeholder="Write your events in natural language..."
                       className="w-full resize-y rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-4 py-3 text-sm text-[#0A0A0A] outline-none transition-colors focus:border-[#0A0A0A]"
                     />
                     <button
@@ -432,7 +432,7 @@ export default function EmpezarPage() {
                       disabled={extracting}
                       className="font-heading mt-2 w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3 text-sm font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
                     >
-                      {extracting ? 'Extrayendo con IA...' : 'Extraer eventos desde texto'}
+                      {extracting ? 'Extracting with AI...' : 'Extract events from text'}
                     </button>
                   </>
                 )}
@@ -457,7 +457,7 @@ export default function EmpezarPage() {
               {/* Steps 2–4 only when authenticated */}
               {authenticated && (
                 <>
-                  <StepCard num={2} title="Calendario">
+                  <StepCard num={2} title="Calendar">
                     {!creatingNewCalendar ? (
                       <>
                         <select
@@ -472,14 +472,14 @@ export default function EmpezarPage() {
                           onClick={() => setCreatingNewCalendar(true)}
                           className="font-heading mt-2 cursor-pointer text-xs font-semibold text-[#777] underline underline-offset-4 hover:text-[#0A0A0A]"
                         >
-                          + Crear nuevo calendario
+                          + Create new calendar
                         </button>
                       </>
                     ) : (
                       <>
                         <Input
                           type="text"
-                          placeholder="Nombre del nuevo calendario"
+                          placeholder="New calendar name"
                           value={newCalendarName}
                           onChange={e => setNewCalendarName(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && void handleCreateCalendar()}
@@ -492,21 +492,21 @@ export default function EmpezarPage() {
                             disabled={creatingCalendar || !newCalendarName.trim()}
                             className="font-heading flex-1 cursor-pointer rounded-full bg-[#0A0A0A] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#333] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
                           >
-                            {creatingCalendar ? 'Creando...' : 'Crear'}
+                            {creatingCalendar ? 'Creating...' : 'Create'}
                           </button>
                           <button
                             type="button"
                             onClick={() => { setCreatingNewCalendar(false); setNewCalendarName(''); }}
                             className="font-heading cursor-pointer rounded-full border border-[#E0E0E0] px-4 py-2 text-xs font-semibold text-[#555] hover:border-[#0A0A0A]"
                           >
-                            Cancelar
+                            Cancel
                           </button>
                         </div>
                       </>
                     )}
                   </StepCard>
 
-                  <StepCard num={3} title="Color de los eventos">
+                  <StepCard num={3} title="Event color">
                     <div className="flex flex-wrap gap-2.5">
                       {COLORS.map(c => (
                         <button
@@ -523,14 +523,14 @@ export default function EmpezarPage() {
                     </div>
                   </StepCard>
 
-                  <StepCard num={4} title="Notificación por email">
+                  <StepCard num={4} title="Email reminder">
                     <div className="flex gap-3">
                       <div className="flex-1">
-                        <p className="mb-1.5 text-xs text-[#999]">Días antes</p>
+                        <p className="mb-1.5 text-xs text-[#999]">Days before</p>
                         <Input type="number" min={1} value={notifyDays} onChange={e => setNotifyDays(Number(e.target.value))} />
                       </div>
                       <div className="flex-1">
-                        <p className="mb-1.5 text-xs text-[#999]">Hora (0–23)</p>
+                        <p className="mb-1.5 text-xs text-[#999]">Hour (0-23)</p>
                         <Input type="number" min={0} max={23} value={notifyHour} onChange={e => setNotifyHour(Number(e.target.value))} />
                       </div>
                     </div>
@@ -545,7 +545,7 @@ export default function EmpezarPage() {
                   disabled={events.length === 0 || loggingIn}
                   className="font-heading w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3.5 text-[15px] font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
                 >
-                  {loggingIn ? 'Conectando...' : 'Conectar con Google para continuar'}
+                  {loggingIn ? 'Connecting...' : 'Connect with Google to continue'}
                 </button>
               ) : (
                 <button
@@ -553,7 +553,7 @@ export default function EmpezarPage() {
                   disabled={loading || extracting || events.length === 0 || !calendarId}
                   className="font-heading w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3.5 text-[15px] font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512] disabled:cursor-not-allowed disabled:bg-[#E5E5E5] disabled:text-[#AAA]"
                 >
-                  {loading ? 'Cargando en Google Calendar...' : 'Cargar en Google Calendar'}
+                  {loading ? 'Creating in Google Calendar...' : 'Create in Google Calendar'}
                 </button>
               )}
             </div>
@@ -569,9 +569,9 @@ export default function EmpezarPage() {
               </div>
               <div>
                 <h2 className="font-heading mb-1 text-[22px] font-extrabold tracking-[-0.02em] text-[#0A0A0A]">
-                  {result.length} eventos creados
+                  {result.length} events created
                 </h2>
-                <p className="text-sm text-[#666]">Ya están en tu Google Calendar.</p>
+                <p className="text-sm text-[#666]">They are now in your Google Calendar.</p>
               </div>
               <div className="w-full overflow-hidden rounded-xl border border-[#ECECEC]">
                 <div className="max-h-[200px] overflow-y-auto">
@@ -595,7 +595,7 @@ export default function EmpezarPage() {
                 }}
                 className="font-heading w-full cursor-pointer rounded-full border-none bg-[#E8E815] p-3.5 text-[15px] font-bold text-[#0A0A0A] transition-colors hover:bg-[#d4d512]"
               >
-                Cargar más eventos
+                Add more events
               </button>
             </article>
           )}
@@ -605,10 +605,10 @@ export default function EmpezarPage() {
           <div className="hidden min-w-0 flex-1 lg:block">
             <div className="sticky top-[84px]">
               <div className="mb-3 flex items-center gap-2">
-                <p className="font-heading text-xs font-semibold tracking-[0.06em] text-[#999] uppercase">Vista previa</p>
+                <p className="font-heading text-xs font-semibold tracking-[0.06em] text-[#999] uppercase">Preview</p>
                 {events.length > 0 && (
                   <span className="rounded-full bg-[#E8E815] px-2 py-0.5 font-heading text-[10px] font-bold text-[#0A0A0A]">
-                    {events.length} evento{events.length !== 1 ? 's' : ''}
+                    {events.length} event{events.length !== 1 ? 's' : ''}
                   </span>
                 )}
               </div>
@@ -617,7 +617,7 @@ export default function EmpezarPage() {
               </div>
               {events.length === 0 && (
                 <p className="mt-3 text-center text-xs text-[#BBB]">
-                  Acá vas a ver los eventos antes de crearlos
+                  Your events will appear here before creation
                 </p>
               )}
             </div>

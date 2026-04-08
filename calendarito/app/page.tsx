@@ -39,7 +39,7 @@ export default function HomePage() {
   }, []);
 
   const ctaHref = '/empezar';
-  const ctaLabel = 'Empezar gratis';
+  const ctaLabel = 'Start free';
 
   async function handleLogin() {
     try {
@@ -81,7 +81,7 @@ export default function HomePage() {
                 href="/empezar"
                 className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
               >
-                Ir a la app
+                Go to app
               </Link>
             ) : (
               <button
@@ -107,7 +107,7 @@ export default function HomePage() {
                     d="M9 3.5809c1.3214 0 2.5082.4541 3.4423 1.3459l2.5814-2.5814C13.4632.8909 11.4259 0 9 0 6.0164 0 3.4377 2.0168 1.9568 4.9582l2.0064 2.3317C4.6718 5.1636 6.6559 3.5809 9 3.5809z"
                   />
                 </svg>
-                {loggingIn ? 'Conectando...' : 'Login'}
+                {loggingIn ? 'Connecting...' : 'Login'}
               </button>
             )}
           </div>
@@ -117,13 +117,13 @@ export default function HomePage() {
       {/* ── Hero ── */}
       <section className="flex flex-1 flex-col items-center px-6 pt-[60px] text-center">
         <h1 className="mx-auto mb-7 max-w-[820px] font-heading text-[clamp(44px,7vw,72px)] leading-[1.05] font-black tracking-[-0.04em] text-[#0A0A0A]">
-          Traé tus ideas<br />
-          y creá eventos en<br />
-          segundos<WavySVG />
+          Drop in anything,<br />
+          get calendar<br />
+          events<WavySVG />
         </h1>
 
         <p className="mx-auto mb-10 max-w-[460px] text-lg leading-[1.6] text-[#555]">
-          Subí un archivo o pegá texto libre. Calendarito usa IA para estructurar todo y crear tus eventos en Google Calendar.
+          Use natural language, files, PDFs, or images. Share anything you want, and we handle the rest to create events in your Google Calendar.
         </p>
 
         <div className="mb-16 flex flex-wrap justify-center gap-3">
@@ -137,14 +137,14 @@ export default function HomePage() {
             href="/como-funciona"
             className="font-heading rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
           >
-            Ver cómo funciona
+            See how it works
           </Link>
         </div>
 
         <div className="mb-16 w-full max-w-[500px] overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)]">
           <Image
             src="/hero-2.png"
-            alt="Personaje organizando un calendario"
+            alt="Character organizing a calendar"
             width={500}
             height={375}
             className="block h-auto w-full"

@@ -13,6 +13,6 @@ export async function GET() {
       },
     });
   } catch {
-    return Response.json({ error: 'No se pudo cargar el mapa del flujo' }, { status: 404 });
+    return Response.json({ error: 'Could not load flow map' }, { status: 404 });
   }
 }

@@ -5,16 +5,16 @@ import Link from 'next/link';
 
 const steps = [
   {
-    title: 'Conectás tu Google Calendar',
-    description: 'Autorizás el acceso para que podamos crear eventos en tu cuenta.',
+    title: 'Connect your Google Calendar',
+    description: 'Grant access so we can create events in your account.',
   },
   {
-    title: 'Compartís tu información',
-    description: 'Subís un archivo o pegás texto libre con fechas, temas y detalles.',
+    title: 'Share your source',
+    description: 'Upload a file, PDF, image, or paste natural language with dates and details.',
   },
   {
-    title: 'La IA estructura y vos confirmás',
-    description: 'Transformamos todo en eventos claros para revisar antes de crearlos.',
+    title: 'We structure, you confirm',
+    description: 'AI turns everything into clear events so you can review before creating them.',
   },
 ];
 
@@ -35,24 +35,24 @@ export default function ComoFuncionaPage() {
             href="/empezar"
             className="font-heading rounded-full bg-[#0A0A0A] px-5 py-2 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#333]"
           >
-            Empezar gratis
+            Start free
           </Link>
         </nav>
       </div>
 
       <section className="px-6 pb-8 pt-[56px] text-center">
         <h1 className="font-heading mx-auto mb-3 max-w-[900px] text-3xl font-bold tracking-[-0.03em] text-[#0A0A0A] md:text-4xl">
-          Del contenido al calendario en 3 pasos
+          From source to calendar in 3 steps
         </h1>
         <p className="mx-auto mb-8 max-w-3xl text-sm leading-6 text-[#555] md:text-base">
-          Este es el mapa general del flujo. Primero conectás tu cuenta, después compartís tu contenido
-          y finalmente la IA te propone eventos para confirmar.
+          This is the complete flow. First connect your account, then share your content,
+          and finally review the events AI prepared for your Google Calendar.
         </p>
 
         <div className="mx-auto w-full max-w-[900px] overflow-hidden rounded-[28px] border border-[#E4E4E4] bg-[#F7F7F7] shadow-[0_12px_36px_rgba(0,0,0,0.1)]">
           <Image
             src="/api/flow-map"
-            alt="Mapa visual del flujo de Calendarito"
+            alt="Calendarito flow map"
             width={1024}
             height={576}
             className="block h-auto w-full"

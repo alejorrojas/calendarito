@@ -16,7 +16,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Calendarito",
-  description: "Convertí archivos o texto libre en eventos de Google Calendar con ayuda de IA",
+  description: "Turn natural language, files, PDFs, and images into Google Calendar events with AI.",
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${poppins.variable} ${inter.variable} h-full`}>
+    <html lang="en" className={`${poppins.variable} ${inter.variable} h-full`}>
       <body className="font-body min-h-full flex flex-col text-[var(--text)]">{children}</body>
     </html>
   );

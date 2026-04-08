@@ -19,14 +19,14 @@ function getCurrentDateTool() {
 }
 
 const extractedEventSchema = z.object({
-  summary: z.string().min(1).describe('Título corto del evento'),
-  date: z.string().regex(DATE_REGEX).describe('Fecha en formato YYYY-MM-DD'),
-  allDay: z.boolean().nullable().describe('true si es evento de día completo, null si no hay certeza'),
-  startTime: z.string().regex(TIME_REGEX).nullable().describe('Hora de inicio en HH:mm, null si es allDay'),
-  endTime: z.string().regex(TIME_REGEX).nullable().describe('Hora de fin en HH:mm, null si es allDay'),
-  timezone: z.string().nullable().describe('Timezone, por ejemplo America/Argentina/Buenos_Aires, o null'),
-  description: z.string().nullable().describe('Descripción opcional o null'),
-  location: z.string().nullable().describe('Ubicación opcional o null'),
+  summary: z.string().min(1).describe('Short event title'),
+  date: z.string().regex(DATE_REGEX).describe('Date in YYYY-MM-DD format'),
+  allDay: z.boolean().nullable().describe('true if this is an all-day event, null if uncertain'),
+  startTime: z.string().regex(TIME_REGEX).nullable().describe('Start time in HH:mm, null for all-day events'),
+  endTime: z.string().regex(TIME_REGEX).nullable().describe('End time in HH:mm, null for all-day events'),
+  timezone: z.string().nullable().describe('Timezone, for example America/Argentina/Buenos_Aires, or null'),
+  description: z.string().nullable().describe('Optional description or null'),
+  location: z.string().nullable().describe('Optional location or null'),
 });
 
 const extractionSchema = z.object({
@@ -46,15 +46,15 @@ export async function POST(req: NextRequest) {
     };
 
     if (!sourceType || (sourceType !== 'text' && sourceType !== 'file')) {
-      return NextResponse.json({ error: 'sourceType inválido' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid sourceType' }, { status: 400 });
     }
 
     if (sourceType === 'text' && !inputText?.trim()) {
-      return NextResponse.json({ error: 'Falta texto para analizar' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing text input to analyze' }, { status: 400 });
     }
 
     if (sourceType === 'file' && !fileData) {
-      return NextResponse.json({ error: 'Falta archivo para analizar' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing file input to analyze' }, { status: 400 });
     }
 
     const userContent: Array<
@@ -64,12 +64,12 @@ export async function POST(req: NextRequest) {
     > = [
       {
         type: 'text',
-        text: 'Extraé eventos desde la información recibida. Si no hay certeza en hora, devolvé allDay=true y sin horas. No inventes datos críticos. Si falta fecha exacta, agregá warning y omití ese evento.',
+        text: 'Extract events from the provided information. If time is uncertain, return allDay=true with no times. Do not invent critical data. If an exact date is missing, add a warning and omit that event.',
       },
     ];
 
     if (sourceType === 'text') {
-      userContent.push({ type: 'text', text: `Texto del usuario:\n${inputText}` });
+      userContent.push({ type: 'text', text: `User text:\n${inputText}` });
     }
 
     if (sourceType === 'file' && fileData && mediaType) {
@@ -98,7 +98,7 @@ Strict rules:
 - Dates must use YYYY-MM-DD.
 - Today's reference date is ${currentDate}.
 - If an event mentions a date without year, assume year ${currentYear}.
-- Resolve relative expressions (e.g. "este miércoles", "mañana", "la semana que viene") using the reference date above.
+- Resolve relative expressions (e.g. "this Wednesday", "tomorrow", "next week") using the reference date above.
 - Times must use HH:mm (24-hour format).
 - If time is ambiguous or unclear, set allDay=true and set startTime/endTime/timezone to null.
 - If an exact date is missing, omit that event and add a warning.
@@ -110,7 +110,7 @@ Strict rules:
 
     return NextResponse.json(object);
   } catch (err) {
-    const message = err instanceof Error ? err.message : 'Error extrayendo eventos con IA';
+    const message = err instanceof Error ? err.message : 'Error extracting events with AI';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

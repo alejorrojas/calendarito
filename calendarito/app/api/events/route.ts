@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       const summary =
         row.summary?.trim() ||
         `${row.topic ?? ''}${row.topic && row.name ? ' - ' : ''}${row.name ?? ''}`.trim() ||
-        'Evento sin título';
+        'Untitled event';
       const isTimed = row.allDay === false && Boolean(row.startTime);
       const eventColorId = row.colorId ?? colorId;
       const reminderValue = row.reminderMinutes ?? notifyMinutes;
