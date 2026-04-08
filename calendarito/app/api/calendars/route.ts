@@ -3,17 +3,19 @@ import { createSupabaseServerClient } from '@/lib/supabase-server';
 import { google } from 'googleapis';
 import { NextResponse } from 'next/server';
 
-export async function GET() {
+export async function GET(req: Request) {
   const supabase = await createSupabaseServerClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session?.provider_token) {
+  const providerToken = session?.provider_token ?? req.headers.get('x-provider-token');
+
+  if (!providerToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const client = getOAuthClient();
-    client.setCredentials({ access_token: session.provider_token });
+    client.setCredentials({ access_token: providerToken });
     const calendar = google.calendar({ version: 'v3', auth: client });
     const res = await calendar.calendarList.list();
     const calendars = (res.data.items ?? []).map(c => ({ id: c.id, name: c.summary }));
