@@ -96,6 +96,8 @@ export async function POST(req: NextRequest) {
     const snapshot = [...created];
 
     after(async () => {
+      if (!userId) return;
+
       const supabaseBg = await createSupabaseServerClient();
       const { data: prevCounters } = await supabaseBg
         .from('usage_counters')
