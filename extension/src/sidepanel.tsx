@@ -175,7 +175,10 @@ export default function SidePanel() {
   }
 
   async function handleSubmit() {
-    if (!session?.access_token || !session?.provider_token) return
+    if (!session?.access_token || !session?.provider_token) {
+      setError("Google session expired. Please sign in again at calendarito.com.")
+      return
+    }
     setLoading(true)
     setError("")
     setResult(null)
@@ -380,6 +383,16 @@ export default function SidePanel() {
             {(error || extractError) && (
               <div className="rounded-2xl border border-[#FFCDD2] bg-[#FFF0F0] px-4 py-3 text-[13px] text-[#C62828]">
                 {error || extractError}
+                {error && /credential|auth|token|OAuth/i.test(error) && (
+                  <a
+                    href="https://calendarito.com/login"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 block font-semibold underline"
+                  >
+                    Sign in again →
+                  </a>
+                )}
               </div>
             )}
 
