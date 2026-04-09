@@ -7,7 +7,11 @@ export async function GET(req: Request) {
   const supabase = await createSupabaseServerClient();
   const { data: { session } } = await supabase.auth.getSession();
 
-  const providerToken = session?.provider_token ?? req.headers.get('x-provider-token');
+  const bearerToken = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '').trim();
+  const providerToken =
+    session?.provider_token ??
+    req.headers.get('x-provider-token') ??
+    (bearerToken || null);
 
   if (!providerToken) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

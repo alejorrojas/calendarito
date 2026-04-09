@@ -365,7 +365,11 @@ export default function EmpezarPage() {
   }, []);
 
   const fetchCalendars = useCallback(async () => {
-    const res = await fetch("/api/calendars");
+    const res = await fetch("/api/calendars", {
+      headers: googleAccessToken
+        ? { "x-provider-token": googleAccessToken }
+        : undefined,
+    });
     const data = await res.json();
     if (data.calendars) {
       const all: Calendar[] = data.calendars;
@@ -379,7 +383,7 @@ export default function EmpezarPage() {
       const primary = sorted.find((c) => c.id === userEmail);
       setCalendarId(primary?.id ?? sorted[0]?.id ?? "");
     }
-  }, [userEmail]);
+  }, [googleAccessToken, userEmail]);
 
   useEffect(() => {
     if (authenticated && userEmail) void fetchCalendars();
