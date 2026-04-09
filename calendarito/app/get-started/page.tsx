@@ -245,9 +245,7 @@ export default function EmpezarPage() {
 
         const normalizedEvents: EventRow[] = parsed.flatMap((item) => {
           if (!item || typeof item !== "object") return [];
-          const maybeEvent = item as Partial<EventRow> & {
-            "@invites"?: unknown;
-          };
+          const maybeEvent = item as Partial<EventRow>;
           const normalizedDate = normalizeDateOnly(maybeEvent.date);
           if (
             !normalizedDate ||
@@ -267,9 +265,7 @@ export default function EmpezarPage() {
               timezone: maybeEvent.timezone,
               description: maybeEvent.description,
               location: maybeEvent.location,
-              invites: normalizeInviteEmails(
-                maybeEvent.invites ?? maybeEvent["@invites"],
-              ),
+              invites: normalizeInviteEmails(maybeEvent.invites),
               colorId:
                 typeof maybeEvent.colorId === "string"
                   ? maybeEvent.colorId
@@ -408,7 +404,7 @@ export default function EmpezarPage() {
       if (!res.ok) throw new Error(data.error ?? "Could not extract events");
       const extractedEvents = (data.events ?? []).flatMap((item: unknown) => {
         if (!item || typeof item !== "object") return [];
-        const maybeEvent = item as Partial<EventRow> & { "@invites"?: unknown };
+        const maybeEvent = item as Partial<EventRow>;
         const normalizedDate = normalizeDateOnly(maybeEvent.date);
         if (!normalizedDate || typeof maybeEvent.summary !== "string") return [];
         return [
@@ -421,9 +417,7 @@ export default function EmpezarPage() {
             timezone: maybeEvent.timezone,
             description: maybeEvent.description,
             location: maybeEvent.location,
-            invites: normalizeInviteEmails(
-              maybeEvent.invites ?? maybeEvent["@invites"],
-            ),
+            invites: normalizeInviteEmails(maybeEvent.invites),
             colorId: maybeEvent.colorId,
           } satisfies EventRow,
         ];

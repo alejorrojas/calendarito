@@ -19,7 +19,6 @@ interface EventRow {
   description?: string;
   location?: string;
   invites?: string[];
-  '@invites'?: string[];
   colorId?: string;
   reminderMinutes?: number;
 }
@@ -75,7 +74,7 @@ export async function POST(req: NextRequest) {
         row.summary?.trim() ||
         `${row.topic ?? ''}${row.topic && row.name ? ' - ' : ''}${row.name ?? ''}`.trim() ||
         'Untitled event';
-      const inviteEmails = normalizeInviteEmails(row.invites ?? row['@invites']);
+      const inviteEmails = normalizeInviteEmails(row.invites);
       const isTimed = row.allDay === false && Boolean(row.startTime);
       const eventColorId = row.colorId ?? colorId;
       const reminderValue = row.reminderMinutes ?? notifyMinutes;
