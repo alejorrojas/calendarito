@@ -8,6 +8,23 @@ import { useAuth } from "~features/useAuth"
 
 const APP = "https://calendarito.com"
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function normalizeInviteEmails(value: unknown): string[] {
+  const candidates = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/[,\n;\s]+/)
+      : []
+  const unique = new Set<string>()
+  for (const raw of candidates) {
+    if (typeof raw !== "string") continue
+    const normalized = raw.trim().toLowerCase()
+    if (EMAIL_REGEX.test(normalized)) unique.add(normalized)
+  }
+  return Array.from(unique)
+}
+
 const COLORS = [
   { id: "1", name: "Lavender", hex: "#7986cb" },
   { id: "2", name: "Sage", hex: "#33b679" },
@@ -30,6 +47,7 @@ export type ExtractedEvent = {
   timezone?: string
   description?: string
   location?: string
+  invites?: string[]
   colorId?: string
 }
 
@@ -68,6 +86,7 @@ export default function SidePanel() {
   // Events state
   const [events, setEvents] = useState<ExtractedEvent[]>([])
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set())
+  const [inviteDraftByEvent, setInviteDraftByEvent] = useState<Record<number, string>>({})
   const [extracting, setExtracting] = useState(false)
   const [extractError, setExtractError] = useState("")
 
@@ -139,8 +158,14 @@ export default function SidePanel() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? "Could not extract events")
-      const extracted = (data.events ?? []) as ExtractedEvent[]
+      const extracted = (data.events ?? []).flatMap((item: unknown) => {
+        if (!item || typeof item !== "object") return []
+        const e = item as Partial<ExtractedEvent>
+        if (!e.date || !e.summary) return []
+        return [{ ...e, invites: normalizeInviteEmails(e.invites) } as ExtractedEvent]
+      })
       setEvents(extracted)
+      setInviteDraftByEvent({})
       if (!extracted.length) setExtractError("No clear events found in the provided source.")
     } catch (e) {
       setExtractError(e instanceof Error ? e.message : "Error processing source")
@@ -211,6 +236,35 @@ export default function SidePanel() {
     setEvents((prev) => prev.map((e, idx) => (idx === i ? { ...e, ...patch } : e)))
   }
 
+  function addInvites(index: number, rawTokens: string[]) {
+    setEvents((prev) =>
+      prev.map((event, i) => {
+        if (i !== index) return event
+        const existing = new Set(
+          (event.invites ?? []).map((inv) => inv.trim().toLowerCase()).filter((inv) => EMAIL_REGEX.test(inv))
+        )
+        for (const token of rawTokens) {
+          const normalized = token.trim().toLowerCase()
+          if (EMAIL_REGEX.test(normalized)) existing.add(normalized)
+        }
+        return { ...event, invites: Array.from(existing) }
+      })
+    )
+  }
+
+  function removeInvite(index: number, inviteToRemove: string) {
+    const normalizedToRemove = inviteToRemove.trim().toLowerCase()
+    setEvents((prev) =>
+      prev.map((event, i) => {
+        if (i !== index) return event
+        return {
+          ...event,
+          invites: (event.invites ?? []).filter((inv) => inv.trim().toLowerCase() !== normalizedToRemove)
+        }
+      })
+    )
+  }
+
   function removeEvent(i: number) {
     setEvents((prev) => prev.filter((_, idx) => idx !== i))
     setExpandedEvents((prev) => {
@@ -218,6 +272,16 @@ export default function SidePanel() {
       for (const n of prev) {
         if (n < i) next.add(n)
         if (n > i) next.add(n - 1)
+      }
+      return next
+    })
+    setInviteDraftByEvent((prev) => {
+      const next: Record<number, string> = {}
+      for (const [key, value] of Object.entries(prev)) {
+        const current = Number(key)
+        if (Number.isNaN(current)) continue
+        if (current < i) next[current] = value
+        if (current > i) next[current - 1] = value
       }
       return next
     })
@@ -351,6 +415,11 @@ export default function SidePanel() {
                           <div className="min-w-0">
                             <p className="truncate text-xs font-medium text-[#0A0A0A]">{event.summary}</p>
                             <p className="text-[11px] text-[#888]">{eventLabel(event)}</p>
+                            {event.invites && event.invites.length > 0 && (
+                              <p className="text-[11px] text-[#888]">
+                                {event.invites.length} invite{event.invites.length !== 1 ? "s" : ""}
+                              </p>
+                            )}
                           </div>
                           <div className="ml-3 flex items-center gap-2 shrink-0">
                             <span
@@ -373,6 +442,56 @@ export default function SidePanel() {
                               className="px-3 py-2 text-xs"
                               placeholder="Event title"
                             />
+                            {/* Invite chip input */}
+                            <div className="box-border flex min-h-[34px] w-full flex-wrap items-center gap-1.5 rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-3 py-2 text-xs text-[#0A0A0A] outline-none transition-colors focus-within:border-[#0A0A0A]">
+                              {(event.invites ?? []).map((invite) => (
+                                <span
+                                  key={`${i}-${invite}`}
+                                  className="inline-flex items-center gap-1 rounded-full bg-[#EDEDED] px-2 py-0.5 text-[11px] text-[#0A0A0A]"
+                                >
+                                  <span>{invite}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeInvite(i, invite)}
+                                    aria-label={`Remove invite ${invite}`}
+                                    className="inline-flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-[#666] transition-colors hover:bg-[#DDDDDD] hover:text-[#0A0A0A]"
+                                  >
+                                    <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                      <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                                    </svg>
+                                  </button>
+                                </span>
+                              ))}
+                              <input
+                                type="text"
+                                value={inviteDraftByEvent[i] ?? ""}
+                                onChange={(e) => {
+                                  const value = e.target.value
+                                  const parts = value.split(/[,\n;]+/)
+                                  if (parts.length > 1) {
+                                    addInvites(i, parts.slice(0, -1))
+                                  }
+                                  const draft = parts[parts.length - 1] ?? ""
+                                  setInviteDraftByEvent((prev) => ({ ...prev, [i]: draft }))
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === "," || e.key === "Enter" || e.key === "Tab") {
+                                    e.preventDefault()
+                                    const draft = inviteDraftByEvent[i] ?? ""
+                                    addInvites(i, [draft])
+                                    setInviteDraftByEvent((prev) => ({ ...prev, [i]: "" }))
+                                  }
+                                }}
+                                onBlur={() => {
+                                  const draft = inviteDraftByEvent[i] ?? ""
+                                  if (!draft.trim()) return
+                                  addInvites(i, [draft])
+                                  setInviteDraftByEvent((prev) => ({ ...prev, [i]: "" }))
+                                }}
+                                className="min-w-[160px] flex-1 border-0 bg-transparent p-0 text-xs text-[#0A0A0A] outline-none placeholder:text-[#888]"
+                                placeholder={(event.invites?.length ?? 0) > 0 ? "" : "Invite emails, comma to add"}
+                              />
+                            </div>
                             <div className="grid grid-cols-3 gap-2">
                               <Input
                                 type="date"
