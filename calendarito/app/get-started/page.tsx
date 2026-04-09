@@ -49,6 +49,7 @@ interface EventRow {
   timezone?: string;
   description?: string;
   location?: string;
+  invites?: string[];
   colorId?: string;
 }
 
@@ -66,6 +67,22 @@ interface DraftState {
 }
 
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function normalizeInviteEmails(value: unknown): string[] {
+  const candidates = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(/[,\n;\s]+/)
+      : [];
+  const unique = new Set<string>();
+  for (const raw of candidates) {
+    if (typeof raw !== "string") continue;
+    const normalized = raw.trim().toLowerCase();
+    if (EMAIL_REGEX.test(normalized)) unique.add(normalized);
+  }
+  return Array.from(unique);
+}
 
 function normalizeDateOnly(value: unknown): string | null {
   if (typeof value !== "string") return null;
@@ -200,6 +217,9 @@ export default function EmpezarPage() {
   >(null);
   const [error, setError] = useState("");
   const [expandedEvents, setExpandedEvents] = useState<Set<number>>(new Set());
+  const [inviteDraftByEvent, setInviteDraftByEvent] = useState<
+    Record<number, string>
+  >({});
   const [storageHydrated, setStorageHydrated] = useState(false);
   const selectedCalendar = calendars.find(
     (calendar) => calendar.id === calendarId,
@@ -248,6 +268,7 @@ export default function EmpezarPage() {
               timezone: maybeEvent.timezone,
               description: maybeEvent.description,
               location: maybeEvent.location,
+              invites: normalizeInviteEmails(maybeEvent.invites),
               colorId:
                 typeof maybeEvent.colorId === "string"
                   ? maybeEvent.colorId
@@ -384,8 +405,28 @@ export default function EmpezarPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Could not extract events");
-      const extractedEvents = (data.events ?? []) as EventRow[];
+      const extractedEvents = (data.events ?? []).flatMap((item: unknown) => {
+        if (!item || typeof item !== "object") return [];
+        const maybeEvent = item as Partial<EventRow>;
+        const normalizedDate = normalizeDateOnly(maybeEvent.date);
+        if (!normalizedDate || typeof maybeEvent.summary !== "string") return [];
+        return [
+          {
+            summary: maybeEvent.summary,
+            date: normalizedDate,
+            allDay: maybeEvent.allDay !== false,
+            startTime: maybeEvent.startTime,
+            endTime: maybeEvent.endTime,
+            timezone: maybeEvent.timezone,
+            description: maybeEvent.description,
+            location: maybeEvent.location,
+            invites: normalizeInviteEmails(maybeEvent.invites),
+            colorId: maybeEvent.colorId,
+          } satisfies EventRow,
+        ];
+      });
       setEvents(extractedEvents);
+      setInviteDraftByEvent({});
       persistExtractedEvents(extractedEvents);
       setExtractWarnings(data.warnings ?? []);
       setLastExtractedSourceSummary(extractionSourceSummary);
@@ -500,6 +541,39 @@ export default function EmpezarPage() {
     );
   }
 
+  function addInvites(index: number, rawTokens: string[]) {
+    setEvents((prev) =>
+      prev.map((event, i) => {
+        if (i !== index) return event;
+        const existing = new Set(
+          (event.invites ?? [])
+            .map((invite) => invite.trim().toLowerCase())
+            .filter((invite) => EMAIL_REGEX.test(invite)),
+        );
+        for (const token of rawTokens) {
+          const normalized = token.trim().toLowerCase();
+          if (EMAIL_REGEX.test(normalized)) existing.add(normalized);
+        }
+        return { ...event, invites: Array.from(existing) };
+      }),
+    );
+  }
+
+  function removeInvite(index: number, inviteToRemove: string) {
+    const normalizedToRemove = inviteToRemove.trim().toLowerCase();
+    setEvents((prev) =>
+      prev.map((event, i) => {
+        if (i !== index) return event;
+        return {
+          ...event,
+          invites: (event.invites ?? []).filter(
+            (invite) => invite.trim().toLowerCase() !== normalizedToRemove,
+          ),
+        };
+      }),
+    );
+  }
+
   function removeEvent(index: number) {
     setEvents((prev) => prev.filter((_, i) => i !== index));
     setExpandedEvents((prev) => {
@@ -507,6 +581,16 @@ export default function EmpezarPage() {
       for (const current of prev) {
         if (current < index) next.add(current);
         if (current > index) next.add(current - 1);
+      }
+      return next;
+    });
+    setInviteDraftByEvent((prev) => {
+      const next: Record<number, string> = {};
+      for (const [key, value] of Object.entries(prev)) {
+        const current = Number(key);
+        if (Number.isNaN(current)) continue;
+        if (current < index) next[current] = value;
+        if (current > index) next[current - 1] = value;
       }
       return next;
     });
@@ -641,6 +725,12 @@ export default function EmpezarPage() {
                                 <p className="text-[11px] text-[#888]">
                                   {eventLabel(event)}
                                 </p>
+                                {event.invites && event.invites.length > 0 && (
+                                  <p className="text-[11px] text-[#888]">
+                                    {event.invites.length} invite
+                                    {event.invites.length !== 1 ? "s" : ""}
+                                  </p>
+                                )}
                               </div>
                               <div className="ml-3 flex items-center gap-2">
                                 <span
@@ -683,6 +773,84 @@ export default function EmpezarPage() {
                                   className="px-3 py-2 text-xs"
                                   placeholder="Event title"
                                 />
+                                <div className="box-border flex min-h-[34px] w-full flex-wrap items-center gap-1.5 rounded-xl border-[1.5px] border-[#E0E0E0] bg-[#FAFAFA] px-3 py-2 text-xs text-[#0A0A0A] outline-none transition-colors focus-within:border-[#0A0A0A]">
+                                  {(event.invites ?? []).map((invite) => (
+                                    <span
+                                      key={`${i}-${invite}`}
+                                      className="inline-flex items-center gap-1 rounded-full bg-[#EDEDED] px-2 py-0.5 text-[11px] text-[#0A0A0A]"
+                                    >
+                                      <span>{invite}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => removeInvite(i, invite)}
+                                        aria-label={`Remove invite ${invite}`}
+                                        className="inline-flex h-4 w-4 cursor-pointer items-center justify-center rounded-full text-[#666] transition-colors hover:bg-[#DDDDDD] hover:text-[#0A0A0A]"
+                                      >
+                                        <svg
+                                          width="10"
+                                          height="10"
+                                          viewBox="0 0 12 12"
+                                          fill="none"
+                                          aria-hidden="true"
+                                        >
+                                          <path
+                                            d="M9 3L3 9M3 3l6 6"
+                                            stroke="currentColor"
+                                            strokeWidth="1.6"
+                                            strokeLinecap="round"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </span>
+                                  ))}
+                                  <input
+                                    type="text"
+                                    value={inviteDraftByEvent[i] ?? ""}
+                                    onChange={(e) => {
+                                      const value = e.target.value;
+                                      const parts = value.split(/[,\n;]+/);
+                                      if (parts.length > 1) {
+                                        const completed = parts.slice(0, -1);
+                                        addInvites(i, completed);
+                                      }
+                                      const draft = parts[parts.length - 1] ?? "";
+                                      setInviteDraftByEvent((prev) => ({
+                                        ...prev,
+                                        [i]: draft,
+                                      }));
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (
+                                        e.key === "," ||
+                                        e.key === "Enter" ||
+                                        e.key === "Tab"
+                                      ) {
+                                        e.preventDefault();
+                                        const draft = inviteDraftByEvent[i] ?? "";
+                                        addInvites(i, [draft]);
+                                        setInviteDraftByEvent((prev) => ({
+                                          ...prev,
+                                          [i]: "",
+                                        }));
+                                      }
+                                    }}
+                                    onBlur={() => {
+                                      const draft = inviteDraftByEvent[i] ?? "";
+                                      if (!draft.trim()) return;
+                                      addInvites(i, [draft]);
+                                      setInviteDraftByEvent((prev) => ({
+                                        ...prev,
+                                        [i]: "",
+                                      }));
+                                    }}
+                                    className="min-w-[180px] flex-1 border-0 bg-transparent p-0 text-xs text-[#0A0A0A] outline-none placeholder:text-[#888]"
+                                    placeholder={
+                                      (event.invites?.length ?? 0) > 0
+                                        ? ""
+                                        : "Add invite emails and press comma"
+                                    }
+                                  />
+                                </div>
                                 <div className="grid grid-cols-3 gap-2">
                                   <Input
                                     type="date"
@@ -968,7 +1136,12 @@ export default function EmpezarPage() {
             <div className="lg:sticky lg:top-[84px]">
               <div className="rounded-2xl bg-white shadow-[0_4px_18px_rgba(0,0,0,0.04)]">
                 <CalendarPreview
-                  key={events.map((e) => `${e.date}${e.summary}${e.colorId ?? colorId}`).join("|")}
+                  key={events
+                    .map(
+                      (e) =>
+                        `${e.date}${e.summary}${e.colorId ?? colorId}${e.description ?? ""}${(e.invites ?? []).join(",")}`,
+                    )
+                    .join("|")}
                   events={events}
                   colorId={colorId}
                 />
