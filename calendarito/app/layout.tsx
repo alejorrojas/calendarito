@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Inter, Geist } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -55,7 +56,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={cn("h-full", poppins.variable, inter.variable, "font-sans", geist.variable)}>
-      <body className="font-body min-h-full flex flex-col text-[var(--text)]">{children}</body>
+      <body className="font-body min-h-full flex flex-col text-[var(--text)]">
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-08BXTVDT7R" />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-08BXTVDT7R');
+          `}
+        </Script>
+        {children}
+      </body>
     </html>
   );
 }
