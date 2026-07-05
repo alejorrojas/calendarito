@@ -26,7 +26,8 @@ The Chrome extensions post targets broader discovery intent and includes Calenda
 
 ## Verification
 
-- `RESEND_API_KEY=re_dummy npm run build` passed and generated static routes for:
+- `bunx eslint app/page.tsx app/blog app/robots.ts app/sitemap.ts` passed for the files touched by this task.
+- `RESEND_API_KEY=re_dummy_for_build bun run build` passed and generated static routes for:
   - `/blog`
   - `/blog/why-we-built-calendarito`
   - `/blog/best-chrome-extensions-2026`
@@ -35,5 +36,5 @@ The Chrome extensions post targets broader discovery intent and includes Calenda
 
 ## Existing Non-Blocking Issues
 
-- `npm run lint` currently fails on pre-existing `react/no-unescaped-entities` errors in `app/privacy/page.tsx` and `app/terms/page.tsx`, plus warnings in `app/get-started/page.tsx`. These were not introduced by the blog changes.
-- `npm run build` without environment variables fails because `/api/webhooks/supabase` requires a Resend API key at build/page-data collection time. Build passes when `RESEND_API_KEY` is provided.
+- `bun run lint` currently fails on pre-existing `react/no-unescaped-entities` errors in `app/privacy/page.tsx` and `app/terms/page.tsx`, plus warnings in `app/get-started/page.tsx`. These were not introduced by the blog changes.
+- `bun run build` without environment variables fails because `/api/webhooks/supabase` requires a Resend API key at build/page-data collection time. Build passes when `RESEND_API_KEY` is provided.
