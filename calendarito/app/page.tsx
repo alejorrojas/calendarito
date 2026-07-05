@@ -6,6 +6,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { HeroDemoCarousel } from "@/components/HeroDemoCarousel";
 import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
+const CHROME_WEB_STORE_URL =
+  "https://chromewebstore.google.com/detail/calendarito/cplhjngmdbaicnjhfdoohhjaiahbfflb?utm_campaign=EN&utm_medium=button&utm_source=landing_v2";
+
 const LOGO_MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
   <circle cx="28" cy="28" r="28" fill="#E8E815"/>
   <path d="M28 44V12M28 12L14 26M28 12L42 26" stroke="#0A0A0A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -187,7 +190,13 @@ export default function HomePage() {
       <div className="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-home)] px-6 pt-4 pb-0">
         <nav className="mx-auto flex w-full max-w-[900px] items-center justify-between rounded-full bg-white px-4 py-2.5 pl-5 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
           <LogoDropdown />
-          <div className="flex items-center">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/blog"
+              className="font-heading hidden text-sm font-medium text-[#555] transition-colors hover:text-[#0A0A0A] sm:inline"
+            >
+              Blog
+            </Link>
             {authenticated ? (
               <Link
                 href="/get-started"
@@ -255,9 +264,22 @@ export default function HomePage() {
             whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
           >
+            <a
+              href={CHROME_WEB_STORE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-heading inline-flex h-[56px] w-[260px] items-center justify-center whitespace-nowrap rounded-full bg-[#E8E815] px-8 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512]"
+            >
+              Add to Google Chrome
+            </a>
+          </motion.div>
+          <motion.div
+            whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }}
+            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+          >
             <Link
               href={ctaHref}
-              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#E8E815] px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512] [view-transition-name:cta-get-started]"
+              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center whitespace-nowrap rounded-full bg-white px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-colors hover:bg-[#f8f8f8] [view-transition-name:cta-get-started]"
             >
               {ctaLabel}
             </Link>
@@ -268,7 +290,7 @@ export default function HomePage() {
           >
             <Link
               href="/how-it-works"
-              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
+              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center whitespace-nowrap rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
             >
               See how it works
             </Link>

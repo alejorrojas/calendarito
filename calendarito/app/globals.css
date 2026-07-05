@@ -104,6 +104,44 @@
     }
 }
 
+.blog-article {
+    color: #444;
+    font-size: 16px;
+    line-height: 1.75;
+}
+
+.blog-article > * + * {
+    margin-top: 1.15rem;
+}
+
+.blog-article h2 {
+    margin-top: 2.2rem;
+    font-family: var(--font-heading);
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    color: #0a0a0a;
+}
+
+.blog-article a {
+    color: #0a0a0a;
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+}
+
+.blog-article blockquote {
+    border-left: 5px solid #e8e815;
+    border-radius: 14px;
+    background: #f7f7f7;
+    padding: 1rem 1.25rem;
+    color: #0a0a0a;
+    font-family: var(--font-heading);
+    font-weight: 700;
+}
+
 /* ── Schedule-X minimal reskin ────────────────────────────── */
 .calendar-preview-shell .sx__calendar-wrapper .sx__calendar {
     border: 1px solid #f0f0f0 !important;
