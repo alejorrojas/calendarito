@@ -617,7 +617,7 @@ export default function EmpezarPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-[var(--bg-home)] pt-[68px]">
-      {/* Nav — same floating pill as home/how-it-works */}
+      {/* Nav — same floating pill as home */}
       <div className="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-home)] px-6 pt-4 pb-0">
         <nav className="mx-auto flex w-full max-w-[900px] items-center justify-between rounded-full bg-white px-4 py-2.5 pl-5 shadow-[0_2px_12px_rgba(0,0,0,0.08)]">
           <Link href="/" className="flex items-center gap-2 no-underline">

@@ -102,7 +102,7 @@ export const blogPosts: BlogPost[] = [
     description:
       "A practical list of useful Chrome extensions for focus, writing, security, scheduling, tab control, and privacy in 2026.",
     excerpt:
-      "A practical 2026 shortlist of Chrome extensions that reduce friction: writing help, password safety, focus, tabs, scheduling, and a promising WhatsApp privacy bonus.",
+      "A practical 2026 shortlist of Chrome extensions that reduce friction: writing help, password safety, focus, tabs, privacy, and a promising scheduling bonus.",
     category: "Extensions",
     publishedAt: "2026-07-05",
     updatedAt: "2026-07-05",
@@ -119,67 +119,55 @@ export const blogPosts: BlogPost[] = [
             "This list focuses on practical extensions for writing, focus, scheduling, security, tab cleanup, and privacy."
           }
         </p>
-        <h2>1. Calendarito</h2>
-        <p>
-          {
-            "Calendarito helps you create Google Calendar events from natural language, files, PDFs, and images. It is especially useful when someone sends a timetable, screenshot, event flyer, or quick meeting note and you want it in your calendar without manually filling out every field."
-          }
-        </p>
-        <p>
-          <a href={calendaritoChromeUrl} target="_blank" rel="noopener noreferrer">
-            Add Calendarito to Google Chrome
-          </a>
-          .
-        </p>
-        <h2>2. Todoist</h2>
+        <h2>1. Todoist</h2>
         <p>
           {
             "Todoist is still a strong task manager for people who want quick capture, recurring tasks, labels, filters, and lightweight project organization. The Chrome extension is useful because it lets you save a page as a task or capture a task without switching context."
           }
         </p>
-        <h2>3. Bitwarden</h2>
+        <h2>2. Bitwarden</h2>
         <p>
           {
             "Bitwarden is a solid password manager for individuals and teams. A password manager extension matters because login security should be fast enough that people actually use strong, unique passwords everywhere."
           }
         </p>
-        <h2>4. 1Password</h2>
+        <h2>3. 1Password</h2>
         <p>
           {
             "1Password is another excellent password manager, especially for teams and families that want polished sharing, passkeys, secure notes, and strong account recovery flows."
           }
         </p>
-        <h2>5. Grammarly</h2>
+        <h2>4. Grammarly</h2>
         <p>
           {
             "Grammarly remains useful for emails, docs, support replies, and social posts. The best use case is not outsourcing your voice; it is catching avoidable mistakes and tightening sentences before you send them."
           }
         </p>
-        <h2>6. Notion Web Clipper</h2>
+        <h2>5. Notion Web Clipper</h2>
         <p>
           {
             "Notion Web Clipper is helpful if your research, notes, or project planning already lives in Notion. It lets you save articles, references, and ideas into a workspace instead of leaving everything scattered across bookmarks."
           }
         </p>
-        <h2>7. OneTab</h2>
+        <h2>6. OneTab</h2>
         <p>
           {
             "OneTab is a simple fix for tab overload. When a window gets messy, it collapses open tabs into a list so you can recover attention without losing the pages you meant to revisit."
           }
         </p>
-        <h2>8. Dark Reader</h2>
+        <h2>7. Dark Reader</h2>
         <p>
           {
             "Dark Reader gives sites a configurable dark mode. It is useful for people who spend long days in the browser and want less visual strain across sites that do not offer their own dark theme."
           }
         </p>
-        <h2>9. uBlock Origin Lite</h2>
+        <h2>8. uBlock Origin Lite</h2>
         <p>
           {
             "uBlock Origin Lite is a Manifest V3-friendly content blocker. For many users, fewer trackers, popups, and visual interruptions make the browser feel calmer and faster."
           }
         </p>
-        <h2>10. Vimium</h2>
+        <h2>9. Vimium</h2>
         <p>
           {
             "Vimium adds keyboard navigation to Chrome. It is not for everyone, but it is excellent if you prefer opening links, switching pages, and moving through the browser without constantly reaching for the mouse."
@@ -203,6 +191,18 @@ export const blogPosts: BlogPost[] = [
             rel="noopener noreferrer"
           >
             Chrome Web Store
+          </a>
+          .
+        </p>
+        <h2>Promising: Calendarito</h2>
+        <p>
+          {
+            "Calendarito is our own extension, so it does not belong at the top of a ranked list. It is a promising pick if your main browser friction is turning messages, PDFs, screenshots, flyers, or quick notes into Google Calendar events without filling every field by hand."
+          }
+        </p>
+        <p>
+          <a href={calendaritoChromeUrl} target="_blank" rel="noopener noreferrer">
+            Add Calendarito to Google Chrome
           </a>
           .
         </p>

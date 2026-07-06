@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
@@ -8,6 +9,23 @@ import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 const CHROME_WEB_STORE_URL =
   "https://chromewebstore.google.com/detail/calendarito/cplhjngmdbaicnjhfdoohhjaiahbfflb?utm_campaign=EN&utm_medium=button&utm_source=landing_v2";
+
+const steps = [
+  {
+    title: "Connect your Google Calendar",
+    description: "Grant access so we can create events in your account.",
+  },
+  {
+    title: "Share your source",
+    description:
+      "Upload a file, PDF, image, or paste natural language with dates and details.",
+  },
+  {
+    title: "We structure, you confirm",
+    description:
+      "We turn everything into clear events so you can review before creating them.",
+  },
+];
 
 const LOGO_MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 56 56">
   <circle cx="28" cy="28" r="28" fill="#E8E815"/>
@@ -258,41 +276,40 @@ export default function HomePage() {
 
         <motion.div
           variants={heroItem}
-          className="mb-16 flex flex-wrap justify-center gap-3"
+          className="mx-auto mb-16 grid w-full max-w-[520px] grid-cols-1 gap-3 sm:grid-cols-2"
         >
           <motion.div
             whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className="w-full"
           >
             <a
               href={CHROME_WEB_STORE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-heading inline-flex h-[56px] w-[260px] items-center justify-center whitespace-nowrap rounded-full bg-[#E8E815] px-8 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512]"
+              className="font-heading inline-flex h-[56px] w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[#E8E815] px-5 py-4 text-base font-bold text-[#0A0A0A] no-underline transition-colors hover:bg-[#d4d512]"
             >
+              <Image
+                src="/chrome-icon.png"
+                alt=""
+                width={22}
+                height={22}
+                className="h-[22px] w-[22px] shrink-0"
+                aria-hidden="true"
+              />
               Add to Google Chrome
             </a>
           </motion.div>
           <motion.div
             whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }}
             whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+            className="w-full"
           >
             <Link
               href={ctaHref}
-              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center whitespace-nowrap rounded-full bg-white px-9 py-4 text-base font-bold text-[#0A0A0A] no-underline shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-colors hover:bg-[#f8f8f8] [view-transition-name:cta-get-started]"
+              className="font-heading inline-flex h-[56px] w-full items-center justify-center whitespace-nowrap rounded-full bg-white px-5 py-4 text-base font-bold text-[#0A0A0A] no-underline shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-colors hover:bg-[#f8f8f8] [view-transition-name:cta-get-started]"
             >
               {ctaLabel}
-            </Link>
-          </motion.div>
-          <motion.div
-            whileHover={shouldReduceMotion ? undefined : { y: -2, scale: 1.01 }}
-            whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
-          >
-            <Link
-              href="/how-it-works"
-              className="font-heading inline-flex h-[56px] w-[220px] items-center justify-center whitespace-nowrap rounded-full bg-[#0A0A0A] px-9 py-4 text-base font-semibold text-white no-underline transition-colors hover:bg-[#333]"
-            >
-              See how it works
             </Link>
           </motion.div>
         </motion.div>
@@ -308,6 +325,67 @@ export default function HomePage() {
         >
           <HeroDemoCarousel />
         </motion.div>
+
+        <motion.section
+          variants={heroItem}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { duration: 0.38, ease: "easeOut" }
+          }
+          className="w-full pb-16"
+          aria-labelledby="how-it-works"
+        >
+          <h2
+            id="how-it-works"
+            className="font-heading mx-auto mb-3 max-w-[760px] text-3xl font-bold tracking-[-0.03em] text-[#0A0A0A] md:text-4xl"
+          >
+            From source to calendar in 3 steps
+          </h2>
+          <p className="mx-auto mb-8 max-w-[620px] text-sm leading-6 text-[#555] md:text-base">
+            Connect your account, share the messy source, then review the events
+            before they go into Google Calendar.
+          </p>
+
+          <div className="group relative mx-auto mb-8 w-full max-w-[500px]">
+            <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-[#E8E815] opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-40" />
+            <div className="relative overflow-hidden rounded-[28px] shadow-[0_20px_60px_rgba(0,0,0,0.15)] transition-shadow duration-500 group-hover:shadow-[0_24px_80px_rgba(232,232,21,0.25)]">
+              <Image
+                src="/hero-2.png"
+                alt="Character organizing a calendar"
+                width={500}
+                height={375}
+                quality={100}
+                className="block h-auto w-full"
+              />
+            </div>
+          </div>
+
+          <div className="mx-auto grid w-full max-w-[900px] gap-3 md:grid-cols-3">
+            {steps.map((step, index) => (
+              <motion.article
+                key={step.title}
+                whileHover={shouldReduceMotion ? undefined : { y: -3 }}
+                transition={
+                  shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: "spring", stiffness: 320, damping: 24 }
+                }
+                className="rounded-2xl border border-[#ECECEC] bg-white p-4 text-left shadow-[0_4px_18px_rgba(0,0,0,0.04)]"
+              >
+                <div className="font-heading mb-3 flex h-7 w-7 items-center justify-center rounded-full bg-[#E8E815] text-xs font-bold text-[#0A0A0A]">
+                  {index + 1}
+                </div>
+                <h3 className="font-heading mb-1.5 text-sm font-semibold text-[#0A0A0A]">
+                  {step.title}
+                </h3>
+                <p className="text-sm leading-5 text-[#666]">
+                  {step.description}
+                </p>
+              </motion.article>
+            ))}
+          </div>
+        </motion.section>
 
         <p className="mx-auto max-w-[420px] text-xs text-[#999] pb-12">
           We never store or view your events. They are created directly in your
