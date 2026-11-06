@@ -105,8 +105,8 @@ export const blogPosts: BlogPost[] = [
       "A practical 2026 shortlist of Chrome extensions that reduce friction: writing help, password safety, focus, tabs, privacy, and a promising scheduling bonus.",
     category: "Extensions",
     publishedAt: "2026-07-05",
-    updatedAt: "2026-07-05",
-    readTime: "6 min read",
+    updatedAt: "2026-11-06",
+    readTime: "7 min read",
     content: (
       <>
         <p>
@@ -203,6 +203,19 @@ export const blogPosts: BlogPost[] = [
         <p>
           <a href={calendaritoChromeUrl} target="_blank" rel="noopener noreferrer">
             Add Calendarito to Google Chrome
+          </a>
+          .
+        </p>
+        <h2>Bonus: Publicame</h2>
+        <p>
+          {
+            "Publicame is a web tool for local shops, clinics, salons, and trades that want Instagram stories with their own logo and colors, published for them. You send what the business needs to say, and the stories go out on their own. It is not a Chrome extension. It is built for small businesses in Argentina that do not want to learn a design app or remember to post every day."
+          }
+        </p>
+        <p>
+          Visit{" "}
+          <a href="https://publicame.xyz/" target="_blank" rel="noopener noreferrer">
+            Publicame
           </a>
           .
         </p>
